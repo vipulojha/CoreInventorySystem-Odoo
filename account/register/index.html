@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Account - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css">
+  <script src="/scripts/auth.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <section class="auth-layout">
+      <section class="hero-card">
+        <p class="eyebrow">New operator</p>
+        <h1>Create your account</h1>
+        <p class="muted">Register with your login ID, display name, email, and password. We will send a one-time password to that email before activating the account.</p>
+        <ul class="mini-list">
+          <li>Login ID and email must be unique</li>
+          <li>Password must meet the policy</li>
+          <li>OTP expires automatically</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Access setup</p>
+        <h2>Register</h2>
+        <div id="register-status" class="status"></div>
+        <form id="register-form" class="stack">
+          <label class="field">
+            <span>Login ID</span>
+            <input id="loginId" maxlength="12" required>
+          </label>
+          <label class="field">
+            <span>Display Name</span>
+            <input id="displayName" maxlength="80" required>
+          </label>
+          <label class="field">
+            <span>Email Address</span>
+            <input id="email" type="email" required>
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="password" type="password" required>
+          </label>
+          <label class="field">
+            <span>Confirm Password</span>
+            <input id="confirmPassword" type="password" required>
+          </label>
+          <button class="button button-primary" type="submit">Send OTP</button>
+        </form>
+        <p><a href="/account/login/">Back to sign in</a></p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

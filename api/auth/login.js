@@ -67,6 +67,7 @@ module.exports = asyncHandler(async (req, res) => {
     ok: true,
     message: "Login successful.",
     token,
+    redirectTo: "/dashboard/",
     user: {
       id: user.id,
       loginId: user.login_id,

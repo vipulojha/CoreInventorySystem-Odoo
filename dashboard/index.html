@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css">
+  <script src="/scripts/auth.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div>
+          <strong>CoreInventory</strong>
+          <div class="muted">Vercel auth workspace</div>
+        </div>
+      </div>
+      <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Authenticated</p>
+        <h1 id="dashboard-name">Operator</h1>
+        <p class="muted">Your sign-in worked. This Vercel deployment is currently serving the public auth experience and API layer.</p>
+      </div>
+      <aside class="hero-card">
+        <p class="eyebrow">Account</p>
+        <h2 id="dashboard-email">-</h2>
+        <p class="muted">JWT token currently stored in this browser:</p>
+        <div id="dashboard-token" class="token-box"></div>
+      </aside>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="card">
+        <p class="eyebrow">Signup</p>
+        <h3>Email OTP enabled</h3>
+        <p>Visitors can create accounts and verify ownership of the email address before activation.</p>
+      </article>
+      <article class="card">
+        <p class="eyebrow">API</p>
+        <h3>JWT login enabled</h3>
+        <p>The login endpoint returns a signed token after email verification succeeds.</p>
+      </article>
+      <article class="card">
+        <p class="eyebrow">Next step</p>
+        <h3>Deployment ready</h3>
+        <p>This secure entry point is now live for public registration, OTP verification, and authenticated access.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

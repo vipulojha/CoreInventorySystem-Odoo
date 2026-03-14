@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Warehouse control</p>
+        <h1>CoreInventory</h1>
+        <p class="muted">Email OTP signup is now live on this Vercel deployment. New visitors can register, verify their email, and sign in from the browser.</p>
+        <div class="button-row">
+          <a class="button button-primary" href="/account/register/">Create account</a>
+          <a class="button button-ghost" href="/account/login/">Sign in</a>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <p class="eyebrow">Live flow</p>
+        <h2>Create account -> Get OTP -> Verify -> Login</h2>
+        <p class="muted">This deployment exposes the public auth flow on top of the shared PostgreSQL user table.</p>
+        <ul class="mini-list">
+          <li>Public signup with email OTP</li>
+          <li>Duplicate email and login checks</li>
+          <li>JWT-based sign in</li>
+        </ul>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

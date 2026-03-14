@@ -122,6 +122,6 @@ module.exports = asyncHandler(async (req, res) => {
   return sendJson(res, 200, {
     ok: true,
     message: "Account created successfully.",
-    redirectTo: "/account/login"
+    redirectTo: "/account/login/"
   });
 });

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify OTP - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css">
+  <script src="/scripts/auth.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <section class="auth-layout">
+      <section class="hero-card">
+        <p class="eyebrow">Email verification</p>
+        <h1>Enter your OTP</h1>
+        <p class="muted">Check the inbox for the email address you used during registration. The OTP is six digits and expires after the configured time limit.</p>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Verify account</p>
+        <h2>OTP confirmation</h2>
+        <div id="verify-status" class="status"></div>
+        <form id="verify-form" class="stack">
+          <label class="field">
+            <span>Email Address</span>
+            <input id="verifyEmail" type="email" required>
+          </label>
+          <label class="field">
+            <span>OTP Code</span>
+            <input id="otp" class="otp-input" inputmode="numeric" maxlength="6" required>
+          </label>
+          <button class="button button-primary" type="submit">Verify OTP</button>
+        </form>
+        <p><a href="/account/register/">Need a new OTP? Register again</a></p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

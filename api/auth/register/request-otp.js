@@ -91,6 +91,8 @@ module.exports = asyncHandler(async (req, res) => {
   return sendJson(res, 200, {
     ok: true,
     message: "OTP sent successfully.",
-    requiresOtp: true
+    requiresOtp: true,
+    redirectTo: "/account/verify/",
+    email
   });
 });

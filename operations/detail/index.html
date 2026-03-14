@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operation Detail - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
+  <style>
+    .pipeline { display:flex; align-items:center; gap:0; margin:1.5rem 0 2rem; }
+    .pipeline-step { padding:0.5rem 1.2rem; font-weight:700; font-size:0.85rem; border-radius:0; background:var(--line); color:var(--muted); white-space:nowrap; }
+    .pipeline-step:first-child { border-radius:14px 0 0 14px; }
+    .pipeline-step:last-child { border-radius:0 14px 14px 0; }
+    .pipeline-step.active { background:var(--teal); color:#fff; }
+    .pipeline-step.done { background:var(--success); color:#fff; }
+    .pipeline-step.cancelled { background:var(--danger); color:#fff; }
+    .pipeline-arrow { font-size:0.9rem; color:var(--muted); margin:0; }
+    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
+    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
+    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .meta-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
+    .meta-card { background:var(--panel); border-radius:var(--radius); padding:1rem 1.2rem; box-shadow:var(--shadow-soft); }
+    .meta-card .label { font-size:0.75rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; }
+    .meta-card .value { font-size:1rem; font-weight:700; margin-top:0.25rem; }
+    .action-row { display:flex; gap:0.75rem; margin-top:1.5rem; }
+    @media(max-width:600px){ .meta-grid{ grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
+      </div>
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button class="button button-ghost" type="button" data-nav="/operations/" style="background:rgba(20,111,116,0.12);">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/my-orders/">My Orders</button>
+        <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/transfer/" data-admin-only>Transfer</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </nav>
+    </header>
+
+    <div id="loading" style="text-align:center;padding:3rem;color:var(--muted);">Loading operation…</div>
+    <div id="content" style="display:none;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+        <p class="eyebrow" id="op-type">Operation</p>
+        <button class="button button-ghost btn-sm" onclick="window.location.href='/print/?ref='+encodeURIComponent(currentRef)" style="font-size:0.8rem;padding:0.25rem 0.7rem;">🖨 Print</button>
+      </div>
+      <h1 id="op-ref" style="margin:0 0 0.5rem;"></h1>
+
+      <!-- Status pipeline -->
+      <div class="pipeline" id="pipeline">
+        <span class="pipeline-step" id="step-draft">Draft</span>
+        <span class="pipeline-arrow">›</span>
+        <span class="pipeline-step" id="step-ready">Ready</span>
+        <span class="pipeline-arrow">›</span>
+        <span class="pipeline-step" id="step-done">Done</span>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-card"><div class="label">Status</div><div class="value" id="op-status"></div></div>
+        <div class="meta-card"><div class="label">Contact</div><div class="value" id="op-contact"></div></div>
+        <div class="meta-card"><div class="label">Scheduled</div><div class="value" id="op-date"></div></div>
+        <div class="meta-card"><div class="label">Warehouse</div><div class="value" id="op-warehouse"></div></div>
+        <div class="meta-card"><div class="label">From</div><div class="value" id="op-from"></div></div>
+        <div class="meta-card"><div class="label">To</div><div class="value" id="op-to"></div></div>
+      </div>
+
+      <p class="eyebrow">Line Items</p>
+      <table class="data-table" style="margin-top:0.5rem;">
+        <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Line Total</th><th>In Stock</th></tr></thead>
+        <tbody id="lines-body"></tbody>
+      </table>
+
+      <div id="action-row" class="action-row" data-admin-only></div>
+      <div id="op-status-msg" class="status" style="margin-top:1rem;"></div>
+    </div>
+  </main>
+
+  <script>
+    let currentRef = "";
+    let currentStatus = "";
+
+    function showStatus(msg, type) {
+      const el = document.getElementById("op-status-msg");
+      el.className = `status visible ${type}`;
+      el.textContent = msg;
+    }
+
+    function renderPipeline(status) {
+      const steps = { draft: "step-draft", ready: "step-ready", done: "step-done" };
+      const order = ["Draft", "Waiting", "Ready", "Done"];
+      const idx = order.indexOf(status);
+      document.getElementById("step-draft").className = "pipeline-step" + (idx >= 0 ? " done" : "");
+      document.getElementById("step-ready").className = "pipeline-step" + (idx >= 2 ? " done" : idx === 1 ? " active" : "");
+      document.getElementById("step-done").className = "pipeline-step" + (status === "Done" ? " done" : status === "Ready" ? " active" : "");
+      if (status === "Cancelled") {
+        document.querySelectorAll(".pipeline-step").forEach(s => s.className = "pipeline-step cancelled");
+      }
+    }
+
+    function renderActions(status, isAdmin) {
+      const row = document.getElementById("action-row");
+      if (!isAdmin || ["Done", "Cancelled"].includes(status)) { row.innerHTML = ""; return; }
+      const nextLabel = status === "Draft" || status === "Waiting" ? "Mark Ready" : "Validate (Done)";
+      row.innerHTML = `
+        <button class="button button-primary" id="btn-advance">${nextLabel}</button>
+        <button class="button button-ghost" id="btn-cancel-op" style="color:var(--danger)">Cancel Operation</button>
+      `;
+      document.getElementById("btn-advance").addEventListener("click", () => doTransition("advance"));
+      document.getElementById("btn-cancel-op").addEventListener("click", () => {
+        if (confirm("Cancel this operation? This cannot be undone.")) doTransition("cancel");
+      });
+    }
+
+    async function doTransition(action) {
+      showStatus("Processing…", "info");
+      try {
+        const res = await fetch("/api/inventory/transition", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ref: currentRef, action })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showStatus(data.message, "success");
+          setTimeout(() => loadOp(), 800);
+        } else {
+          showStatus(data.message || data.error, "error");
+        }
+      } catch(e) { showStatus(e.message, "error"); }
+    }
+
+    function loadOp() {
+      fetch("/api/inventory/operation-detail?ref=" + encodeURIComponent(currentRef))
+        .then(r => r.json())
+        .then(op => {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("content").style.display = "block";
+          document.getElementById("op-type").textContent = op.operation_type + " workflow";
+          document.getElementById("op-ref").textContent = op.reference;
+          document.getElementById("op-status").textContent = op.status;
+          document.getElementById("op-contact").textContent = op.contact_name || "—";
+          document.getElementById("op-date").textContent = new Date(op.schedule_date).toLocaleDateString();
+          document.getElementById("op-warehouse").textContent = op.warehouse_name;
+          document.getElementById("op-from").textContent = op.from_location || "—";
+          document.getElementById("op-to").textContent = op.to_location || "—";
+
+          currentStatus = op.status;
+          renderPipeline(op.status);
+
+          const user = JSON.parse(localStorage.getItem("coreinventory.user") || "{}");
+          renderActions(op.status, user.role === "admin");
+
+          const tbody = document.getElementById("lines-body");
+          if (!op.lines || op.lines.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No line items</td></tr>';
+          } else {
+            tbody.innerHTML = op.lines.map(l => `<tr>
+              <td><strong>${l.product_name}</strong><div style="font-size:0.78rem;color:var(--muted)">${l.sku}</div></td>
+              <td>${l.quantity}</td>
+              <td>₹${parseFloat(l.unit_cost).toLocaleString()}</td>
+              <td>₹${(l.quantity * l.unit_cost).toLocaleString()}</td>
+              <td class="${l.on_hand < l.quantity ? 'low' : ''}">${l.on_hand}</td>
+            </tr>`).join("");
+          }
+        }).catch(e => {
+          document.getElementById("loading").textContent = "Error loading operation: " + e.message;
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = requireAuth();
+      if (!user) return;
+      applyRbac(user);
+      const logoutBtn = document.getElementById("logout-button");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
+
+      const params = new URLSearchParams(window.location.search);
+      currentRef = params.get("ref");
+      if (!currentRef) { window.location.href = "/operations/"; return; }
+      loadOp();
+    });
+  </script>
+</body>
+</html>

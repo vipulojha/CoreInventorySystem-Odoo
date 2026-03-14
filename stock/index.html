@@ -7,13 +7,23 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { margin-bottom: 2rem; }
+    .page-title { margin-bottom: 1.5rem; }
+    .toolbar { display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
     .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
-    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
+    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
     .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
     .data-table tr:last-child td { border-bottom:none; }
-    .low { color: var(--danger); font-weight:800; }
-    .adj-form { margin-top: 2rem; }
+    .low { color:var(--danger); font-weight:800; }
+    .btn-adj { padding:0.28rem 0.65rem; border-radius:8px; border:none; cursor:pointer; font:inherit; font-size:0.8rem; font-weight:700; background:rgba(201,130,28,0.12); color:var(--amber); }
+    .btn-adj:hover { background:rgba(201,130,28,0.22); }
+    /* Modal */
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:var(--panel); border-radius:var(--radius); padding:2rem; width:min(420px,90vw); box-shadow:var(--shadow); }
+    .modal h3 { margin:0 0 0.25rem; }
+    .modal .sub { color:var(--muted); font-size:0.85rem; margin:0 0 1.25rem; }
+    .modal .stack { display:grid; gap:0.85rem; }
+    .modal .actions { display:flex; gap:0.75rem; margin-top:1.25rem; }
   </style>
 </head>
 <body>
@@ -28,7 +38,9 @@
         <button class="button button-ghost" type="button" data-nav="/operations/">Operations</button>
         <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
         <button class="button button-ghost" type="button" data-nav="/stock/" style="background:rgba(20,111,116,0.12);">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/my-orders/">My Orders</button>
         <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/transfer/" data-admin-only>Transfer</button>
         <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
         <button id="logout-button" class="button button-ghost" type="button">Logout</button>
       </nav>
@@ -37,8 +49,15 @@
     <div class="page-title">
       <p class="eyebrow">Inventory</p>
       <h1 style="margin:0.25rem 0 0.5rem;">Live Stock Accuracy</h1>
-      <p class="muted">Real-time on-hand quantities across all locations. Items in <span style="color:var(--danger);font-weight:700;">red</span> are at or below safety stock.</p>
+      <p class="muted">Real-time on-hand quantities. Items in <span style="color:var(--danger);font-weight:700;">red</span> are at or below safety stock (10 units).</p>
     </div>
+
+    <div class="toolbar">
+      <button class="button button-ghost" type="button" data-admin-only data-nav="/transfer/" style="border:1px solid var(--line);">↔ Internal Transfer</button>
+      <button class="button button-ghost" id="btn-send-alert" type="button" data-admin-only style="border:1px solid var(--line);">⚠ Send Low Stock Alert Email</button>
+    </div>
+
+    <div id="status-msg" class="status" style="margin-bottom:1rem;"></div>
 
     <table class="data-table">
       <thead>
@@ -48,46 +67,134 @@
           <th>On Hand</th>
           <th>Allocated</th>
           <th>Free to Use</th>
+          <th data-admin-only></th>
         </tr>
       </thead>
       <tbody id="stock-table-body">
-        <tr><td colspan="5" style="text-align:center; color:var(--muted);">Loading...</td></tr>
+        <tr><td colspan="6" style="text-align:center; color:var(--muted);">Loading…</td></tr>
       </tbody>
     </table>
   </main>
 
+  <!-- Adjust Modal -->
+  <div class="modal-backdrop" id="adj-modal">
+    <div class="modal">
+      <h3>Stock Adjustment</h3>
+      <p class="sub" id="adj-sub">Physical count correction</p>
+      <input type="hidden" id="adj-product-id">
+      <input type="hidden" id="adj-location-id">
+      <div class="stack">
+        <label class="field">
+          <span>Current System Quantity</span>
+          <input id="adj-current" readonly>
+        </label>
+        <label class="field">
+          <span>Actual Physical Count</span>
+          <input id="adj-actual" type="number" min="0" required>
+        </label>
+        <label class="field">
+          <span>Reason (optional)</span>
+          <input id="adj-note" placeholder="e.g. Cycle count, damage write-off">
+        </label>
+      </div>
+      <div id="adj-status" class="status" style="margin-top:0.75rem;"></div>
+      <div class="actions">
+        <button class="button button-primary" id="adj-confirm" type="button">Apply Adjustment</button>
+        <button class="button button-ghost" id="adj-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let stockData = [];
+
+    function showStatus(msg, type) {
+      const el = document.getElementById("status-msg");
+      el.className = `status visible ${type}`;
+      el.textContent = msg;
+      setTimeout(() => { el.className = "status"; }, 4000);
+    }
+
+    function showAdjStatus(msg, type) {
+      const el = document.getElementById("adj-status");
+      el.className = `status visible ${type}`;
+      el.textContent = msg;
+    }
+
+    window.openAdj = function(productId, locationId, productName, onHand) {
+      document.getElementById("adj-product-id").value = productId;
+      document.getElementById("adj-location-id").value = locationId;
+      document.getElementById("adj-sub").textContent = productName;
+      document.getElementById("adj-current").value = onHand;
+      document.getElementById("adj-actual").value = onHand;
+      document.getElementById("adj-note").value = "";
+      document.getElementById("adj-status").className = "status";
+      document.getElementById("adj-modal").classList.add("open");
+    };
+
+    function loadStock() {
+      fetch("/api/inventory/stock")
+        .then(r => r.json())
+        .then(data => {
+          stockData = data || [];
+          const tbody = document.getElementById("stock-table-body");
+          const user = JSON.parse(localStorage.getItem("coreinventory.user") || "{}");
+          const isAdmin = user.role === "admin";
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No stock found</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(b => {
+            const isLow = b.on_hand <= 10;
+            const free = b.on_hand - b.allocated;
+            return `<tr>
+              <td>${b.warehouse_name} / <strong>${b.location_code}</strong></td>
+              <td>[${b.product_sku}] ${b.product_name}</td>
+              <td class="${isLow ? 'low' : ''}">${b.on_hand}</td>
+              <td>${b.allocated}</td>
+              <td>${free}</td>
+              <td>${isAdmin ? `<button class="btn-adj" onclick="openAdj(${b.product_id},${b.location_id},'${b.product_name.replace(/'/g,"\\'")}',${ b.on_hand})">Adjust</button>` : ""}</td>
+            </tr>`;
+          }).join("");
+        }).catch(console.error);
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const user = requireAuth();
       if (!user) return;
       applyRbac(user);
       const logoutBtn = document.getElementById("logout-button");
-      if (logoutBtn) logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("coreinventory.token");
-        localStorage.removeItem("coreinventory.user");
-        window.location.href = "/account/login/";
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
+
+      document.getElementById("adj-confirm").addEventListener("click", async () => {
+        const actual = parseInt(document.getElementById("adj-actual").value);
+        if (isNaN(actual) || actual < 0) { showAdjStatus("Enter a valid count.", "error"); return; }
+        showAdjStatus("Saving…", "info");
+        try {
+          const res = await fetch("/api/inventory/adjust", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: document.getElementById("adj-product-id").value, location_id: document.getElementById("adj-location-id").value, actual_qty: actual, note: document.getElementById("adj-note").value })
+          });
+          const data = await res.json();
+          if (res.ok) { document.getElementById("adj-modal").classList.remove("open"); showStatus(data.message, "success"); loadStock(); }
+          else { showAdjStatus(data.message, "error"); }
+        } catch(e) { showAdjStatus(e.message, "error"); }
       });
 
-      fetch("/api/inventory/stock")
-        .then(r => r.json())
-        .then(data => {
-          const tbody = document.getElementById("stock-table-body");
-          if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No stock found</td></tr>';
-            return;
-          }
-          tbody.innerHTML = data.map(b => {
-            const isLow = b.on_hand <= 10;
-            const freeToUse = b.on_hand - b.allocated;
-            return `<tr>
-              <td>${b.warehouse_name} / <strong>${b.location_code}</strong></td>
-              <td>[${b.product_sku}] ${b.product_name}</td>
-              <td class="${isLow ? "low" : ""}">${b.on_hand}</td>
-              <td>${b.allocated}</td>
-              <td>${freeToUse}</td>
-            </tr>`;
-          }).join("");
-        }).catch(console.error);
+      document.getElementById("adj-cancel").addEventListener("click", () => document.getElementById("adj-modal").classList.remove("open"));
+
+      const alertBtn = document.getElementById("btn-send-alert");
+      if (alertBtn) alertBtn.addEventListener("click", async () => {
+        showStatus("Sending low stock alert email…", "info");
+        try {
+          const res = await fetch("/api/inventory/alert-low-stock", { method: "POST" });
+          const data = await res.json();
+          showStatus(data.message, res.ok ? "success" : "error");
+        } catch(e) { showStatus(e.message, "error"); }
+      });
+
+      loadStock();
     });
   </script>
 </body>

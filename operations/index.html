@@ -7,20 +7,21 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { margin-bottom: 2rem; }
+    .page-title { margin-bottom: 1.5rem; }
     .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
     .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
     .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
     .data-table tr:last-child td { border-bottom:none; }
-    .data-table tbody tr:hover { background:rgba(20,111,116,0.04); cursor:pointer; }
+    .data-table tbody tr:hover { background:rgba(20,111,116,0.05); cursor:pointer; }
     .badge { padding:0.2rem 0.5rem; border-radius:999px; font-size:0.73rem; font-weight:800; text-transform:uppercase; }
     .status-draft { background:rgba(116,102,81,0.15); color:var(--muted); }
     .status-ready { background:rgba(20,111,116,0.15); color:var(--teal-deep); }
     .status-done { background:rgba(47,109,68,0.15); color:var(--success); }
     .status-waiting { background:rgba(201,130,28,0.15); color:var(--amber); }
     .status-cancelled { background:rgba(170,86,53,0.15); color:var(--danger); }
-    .filter-row { display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
-    .filter-row select, .filter-row input { padding:0.55rem 0.9rem; border-radius:12px; border:1px solid rgba(130,117,95,0.26); background:rgba(255,255,255,0.92); font:inherit; }
+    .filter-row { display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; align-items:center; }
+    .filter-row select { padding:0.55rem 0.9rem; border-radius:12px; border:1px solid rgba(130,117,95,0.26); background:rgba(255,255,255,0.92); font:inherit; }
+    .hint { font-size:0.82rem; color:var(--muted); margin-top:0.6rem; }
   </style>
 </head>
 <body>
@@ -35,7 +36,9 @@
         <button class="button button-ghost" type="button" data-nav="/operations/" style="background:rgba(20,111,116,0.12);">Operations</button>
         <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
         <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/my-orders/">My Orders</button>
         <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/transfer/" data-admin-only>Transfer</button>
         <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
         <button id="logout-button" class="button button-ghost" type="button">Logout</button>
       </nav>
@@ -44,7 +47,7 @@
     <div class="page-title">
       <p class="eyebrow">Warehouse</p>
       <h1 style="margin:0.25rem 0 0.5rem;">Operations</h1>
-      <p class="muted">View and manage receipts, deliveries, and internal transfers.</p>
+      <p class="muted">View receipts, deliveries, and adjustments. Click any row to see details and advance its status.</p>
     </div>
 
     <div class="filter-row">
@@ -70,14 +73,15 @@
           <th>Reference</th>
           <th>Type</th>
           <th>Contact</th>
-          <th>Date</th>
+          <th>Scheduled</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody id="operations-table-body">
-        <tr><td colspan="5" style="text-align:center; color:var(--muted);">Loading...</td></tr>
+        <tr><td colspan="5" style="text-align:center; color:var(--muted);">Loading…</td></tr>
       </tbody>
     </table>
+    <p class="hint">Click any row to view full details and validate the operation.</p>
   </main>
 
   <script>
@@ -89,7 +93,7 @@
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No operations found</td></tr>';
         return;
       }
-      tbody.innerHTML = data.map(o => `<tr>
+      tbody.innerHTML = data.map(o => `<tr onclick="window.location.href='/operations/detail/?ref=${encodeURIComponent(o.reference)}'">
         <td><strong>${o.reference}</strong></td>
         <td>${o.operation_type}</td>
         <td>${o.contact_name || "—"}</td>
@@ -101,10 +105,7 @@
     function applyFilters() {
       const type = document.getElementById("type-filter").value;
       const status = document.getElementById("status-filter").value;
-      let filtered = allOps;
-      if (type) filtered = filtered.filter(o => o.operation_type === type);
-      if (status) filtered = filtered.filter(o => o.status === status);
-      renderOps(filtered);
+      renderOps(allOps.filter(o => (!type || o.operation_type === type) && (!status || o.status === status)));
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -112,11 +113,7 @@
       if (!user) return;
       applyRbac(user);
       const logoutBtn = document.getElementById("logout-button");
-      if (logoutBtn) logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("coreinventory.token");
-        localStorage.removeItem("coreinventory.user");
-        window.location.href = "/account/login/";
-      });
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
 
       document.getElementById("type-filter").addEventListener("change", applyFilters);
       document.getElementById("status-filter").addEventListener("change", applyFilters);

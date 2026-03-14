@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Orders - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
+  <style>
+    .page-title { margin-bottom: 1.5rem; }
+    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
+    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
+    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tbody tr:hover { background:rgba(20,111,116,0.04); cursor:pointer; }
+    .badge { padding:0.2rem 0.5rem; border-radius:999px; font-size:0.73rem; font-weight:800; text-transform:uppercase; }
+    .status-draft { background:rgba(116,102,81,0.15); color:var(--muted); }
+    .status-ready { background:rgba(20,111,116,0.15); color:var(--teal-deep); }
+    .status-done { background:rgba(47,109,68,0.15); color:var(--success); }
+    .status-waiting { background:rgba(201,130,28,0.15); color:var(--amber); }
+    .status-cancelled { background:rgba(170,86,53,0.15); color:var(--danger); }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
+      </div>
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button class="button button-ghost" type="button" data-nav="/operations/">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/my-orders/" style="background:rgba(20,111,116,0.12);">My Orders</button>
+        <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/transfer/" data-admin-only>Transfer</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </nav>
+    </header>
+
+    <div class="page-title">
+      <p class="eyebrow">Your Activity</p>
+      <h1 style="margin:0.25rem 0 0.5rem;">My Orders</h1>
+      <p class="muted">All buy requests and operations you have placed. Click any row to view details.</p>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Type</th>
+          <th>Items</th>
+          <th>Total Value</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders-body">
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);">Loading…</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = requireAuth();
+      if (!user) return;
+      applyRbac(user);
+      const logoutBtn = document.getElementById("logout-button");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
+
+      const token = localStorage.getItem("coreinventory.token");
+      fetch("/api/inventory/my-orders", { headers: { "Authorization": "Bearer " + token } })
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.getElementById("orders-body");
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">You have no orders yet. Buy a product to get started!</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(o => `<tr onclick="window.location.href='/operations/detail/?ref=${encodeURIComponent(o.reference)}'">
+            <td><strong>${o.reference}</strong></td>
+            <td>${o.operation_type}</td>
+            <td>${o.line_count}</td>
+            <td>₹${parseFloat(o.total_value || 0).toLocaleString()}</td>
+            <td>${new Date(o.created_at).toLocaleDateString()}</td>
+            <td><span class="badge status-${o.status.toLowerCase()}">${o.status}</span></td>
+          </tr>`).join("");
+        }).catch(console.error);
+    });
+  </script>
+</body>
+</html>

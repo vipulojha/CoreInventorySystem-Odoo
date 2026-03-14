@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Internal Transfer - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
+  <style>
+    .form-card { background:var(--panel); border-radius:var(--radius); padding:2rem; box-shadow:var(--shadow-soft); max-width:560px; }
+    .form-grid { display:grid; gap:1rem; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
+      </div>
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button class="button button-ghost" type="button" data-nav="/operations/">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/my-orders/">My Orders</button>
+        <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/transfer/" style="background:rgba(20,111,116,0.12);" data-admin-only>Transfer</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </nav>
+    </header>
+
+    <p class="eyebrow">Warehouse</p>
+    <h1 style="margin:0.25rem 0 1.5rem;">Internal Transfer</h1>
+
+    <div class="form-card">
+      <p class="muted" style="margin-bottom:1.5rem;">Move stock between two locations within the same warehouse. The transfer completes instantly and is logged in Move History.</p>
+      <div id="transfer-status" class="status" style="margin-bottom:1rem;"></div>
+      <form id="transfer-form" class="form-grid">
+        <label class="field">
+          <span>Product</span>
+          <select id="tf-product" required><option value="">Loading…</option></select>
+        </label>
+        <label class="field">
+          <span>From Location</span>
+          <select id="tf-from" required><option value="">Select…</option></select>
+        </label>
+        <label class="field">
+          <span>To Location</span>
+          <select id="tf-to" required><option value="">Select…</option></select>
+        </label>
+        <label class="field">
+          <span>Quantity</span>
+          <input id="tf-qty" type="number" min="1" value="1" required>
+        </label>
+        <label class="field">
+          <span>Note (optional)</span>
+          <input id="tf-note" placeholder="e.g. Moving to secondary warehouse zone">
+        </label>
+        <button class="button button-primary" type="submit">Execute Transfer</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    function showStatus(msg, type) {
+      const el = document.getElementById("transfer-status");
+      el.className = `status visible ${type}`;
+      el.textContent = msg;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = requireAuth();
+      if (!user) return;
+      applyRbac(user);
+      const logoutBtn = document.getElementById("logout-button");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
+
+      // Load products and locations
+      Promise.all([
+        fetch("/api/inventory/products").then(r => r.json()),
+        fetch("/api/inventory/locations").then(r => r.json())
+      ]).then(([products, locations]) => {
+        const pSel = document.getElementById("tf-product");
+        pSel.innerHTML = '<option value="">Select product…</option>' + (products || []).map(p => `<option value="${p.id}">${p.name} (${p.sku})</option>`).join("");
+        const locOpts = (locations || []).map(l => `<option value="${l.id}">${l.warehouse_name} / ${l.code} — ${l.name}</option>`).join("");
+        document.getElementById("tf-from").innerHTML = '<option value="">Select source…</option>' + locOpts;
+        document.getElementById("tf-to").innerHTML = '<option value="">Select destination…</option>' + locOpts;
+      }).catch(console.error);
+
+      document.getElementById("transfer-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        showStatus("Processing…", "info");
+        try {
+          const res = await fetch("/api/inventory/transfer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              product_id: document.getElementById("tf-product").value,
+              from_location_id: document.getElementById("tf-from").value,
+              to_location_id: document.getElementById("tf-to").value,
+              quantity: parseInt(document.getElementById("tf-qty").value),
+              note: document.getElementById("tf-note").value
+            })
+          });
+          const data = await res.json();
+          showStatus(data.message, res.ok ? "success" : "error");
+          if (res.ok) e.target.reset();
+        } catch(err) { showStatus(err.message, "error"); }
+      });
+    });
+  </script>
+</body>
+</html>

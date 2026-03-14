@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operations - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=3">
+  <script src="/scripts/auth.js?v=3" defer></script>
+  <style>
+    .page-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .data-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-soft); }
+    .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+    .data-table th { background: rgba(20, 111, 116, 0.05); color: var(--teal-deep); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .badge { padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status-draft { background: rgba(116, 102, 81, 0.15); color: var(--muted); }
+    .status-ready { background: rgba(20, 111, 116, 0.15); color: var(--teal-deep); }
+    .status-done { background: rgba(47, 109, 68, 0.15); color: var(--success); }
+    .status-waiting { background: rgba(201, 130, 28, 0.15); color: var(--amber); }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </div>
+    </header>
+
+    <div class="page-title">
+      <div>
+        <h1 style="margin: 0;">Operations</h1>
+        <p class="muted" style="margin: 0.5rem 0 0;">Track receipts, deliveries, and transfers.</p>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Type</th>
+          <th>Contact</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="operations-table-body">
+        <tr><td colspan="5" style="text-align: center; color: var(--muted);">Loading...</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/api/inventory/operations")
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("operations-table-body");
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--muted);">No operations found</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(o => `
+            <tr>
+              <td><strong>${o.reference}</strong></td>
+              <td>${o.operation_type}</td>
+              <td>${o.contact_name || '-'}</td>
+              <td>${new Date(o.schedule_date).toLocaleDateString()}</td>
+              <td><span class="badge status-${o.status.toLowerCase()}">${o.status}</span></td>
+            </tr>
+          `).join('');
+        })
+        .catch(console.error);
+    });
+  </script>
+</body>
+</html>

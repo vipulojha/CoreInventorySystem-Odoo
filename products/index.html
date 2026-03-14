@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=3">
+  <script src="/scripts/auth.js?v=3" defer></script>
+  <style>
+    .page-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .data-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-soft); }
+    .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+    .data-table th { background: rgba(20, 111, 116, 0.05); color: var(--teal-deep); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+    .data-table tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </div>
+    </header>
+
+    <div class="page-title">
+      <div>
+        <h1 style="margin: 0;">Product Catalog</h1>
+        <p class="muted" style="margin: 0.5rem 0 0;">Manage your SKUs and item definitions.</p>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Name</th>
+          <th>Unit Cost</th>
+        </tr>
+      </thead>
+      <tbody id="products-table-body">
+        <tr><td colspan="3" style="text-align: center; color: var(--muted);">Loading...</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/api/inventory/products")
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("products-table-body");
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--muted);">No products found</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(p => `
+            <tr>
+              <td><strong>${p.sku}</strong></td>
+              <td>${p.name}</td>
+              <td>${p.unit_cost}</td>
+            </tr>
+          `).join('');
+        })
+        .catch(console.error);
+    });
+  </script>
+</body>
+</html>

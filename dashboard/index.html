@@ -26,33 +26,47 @@
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">Operator Dashboard</p>
-        <h1 id="dashboard-name">Operator</h1>
+        <h1 id="dashboard-name">Admin Operator</h1>
         <p class="muted">Welcome to your secure workspace. CoreInventory provides real-time visibility into your warehouse operations and catalog data.</p>
       </div>
-      <aside class="hero-card">
-        <p class="eyebrow">Account</p>
-        <h2 id="dashboard-email">-</h2>
-        <p class="muted">JWT token currently stored in this browser:</p>
-        <div id="dashboard-token" class="token-box"></div>
-      </aside>
     </section>
 
     <section class="dashboard-grid">
-      <article class="card">
+      <article class="card" onclick="window.location.href='/products/'" style="cursor: pointer; transition: transform 0.2s; border: 1px solid var(--teal);">
         <p class="eyebrow">Products</p>
         <h3>Manage Catalog</h3>
         <p>Keep track of SKUs, categories, and unit measurements across all your registered locations.</p>
       </article>
-      <article class="card">
+      <article class="card" onclick="window.location.href='/operations/'" style="cursor: pointer; transition: transform 0.2s; border: 1px solid var(--amber);">
         <p class="eyebrow">Operations</p>
         <h3>Track Movements</h3>
         <p>Receive goods from vendors, deliver to customers, and execute internal warehouse transfers.</p>
       </article>
-      <article class="card">
+      <article class="card" onclick="window.location.href='/stock/'" style="cursor: pointer; transition: transform 0.2s; border: 1px solid var(--success);">
         <p class="eyebrow">Inventory</p>
         <h3>Live Stock Accuracy</h3>
         <p>Perform physical counts, handle adjustments, and monitor low stock alerts in real-time.</p>
       </article>
+    </section>
+
+    <!-- KPI Section that we will populate via API -->
+    <section class="dashboard-stats" style="margin-top: 2rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+       <div class="card" style="text-align: center; padding: 1.5rem;">
+          <h2 id="stat-products" style="margin: 0; font-size: 2.5rem; color: var(--teal);">0</h2>
+          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Total Products</p>
+       </div>
+       <div class="card" style="text-align: center; padding: 1.5rem;">
+          <h2 id="stat-low-stock" style="margin: 0; font-size: 2.5rem; color: var(--danger);">0</h2>
+          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Low Stock Items</p>
+       </div>
+       <div class="card" style="text-align: center; padding: 1.5rem;">
+          <h2 id="stat-receipts" style="margin: 0; font-size: 2.5rem; color: var(--amber);">0</h2>
+          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Pending Receipts</p>
+       </div>
+       <div class="card" style="text-align: center; padding: 1.5rem;">
+          <h2 id="stat-deliveries" style="margin: 0; font-size: 2.5rem; color: var(--success);">0</h2>
+          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Pending Deliveries</p>
+       </div>
     </section>
   </main>
 </body>

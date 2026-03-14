@@ -179,6 +179,25 @@ function initDashboardPage() {
     return;
   }
 
+  // Fetch Live KPI Stats
+  const productStat = byId("stat-products");
+  if (productStat) {
+    fetch("/api/inventory/dashboard")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          productStat.textContent = data.products || "0";
+          const lowStockStat = byId("stat-low-stock");
+          if (lowStockStat) lowStockStat.textContent = data.lowStock || "0";
+          const receiptsStat = byId("stat-receipts");
+          if (receiptsStat) receiptsStat.textContent = data.receipts || "0";
+          const deliveriesStat = byId("stat-deliveries");
+          if (deliveriesStat) deliveriesStat.textContent = data.deliveries || "0";
+        }
+      })
+      .catch(console.error);
+  }
+
   if (tokenTarget) {
     tokenTarget.textContent = token;
   }

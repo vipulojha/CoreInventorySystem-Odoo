@@ -7,14 +7,16 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { margin-bottom: 2rem; }
-    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem; }
+    .page-title { margin-bottom: 3rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 2rem; }
     .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th, .data-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
-    .data-table th { font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: var(--teal-deep); }
+    .data-table th, .data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
+    .data-table th { font-weight: 800; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--teal); }
     .data-table tr:last-child td { border-bottom: none; }
-    .form-stack { display: grid; gap: 0.75rem; }
-    @media(max-width: 720px) { .settings-grid { grid-template-columns: 1fr; } }
+    .form-stack { display: grid; gap: 1rem; }
+    .field label { font-size: 0.75rem; color: var(--muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: block; }
+    @media(max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }
+
   </style>
 </head>
 <body>
@@ -52,41 +54,41 @@
 
       <div class="settings-grid">
         <!-- Warehouses -->
-        <section class="panel" style="padding:2rem;">
-          <p class="eyebrow" style="background:rgba(20,111,116,0.1); color:var(--teal);">Configuration</p>
-          <h2 style="margin:0.25rem 0 1.5rem; color:var(--teal-deep);">Warehouses</h2>
-          <div style="background:rgba(255,255,255,0.4); border-radius:16px; overflow:hidden; border:1px solid var(--line);">
+        <section class="panel" style="padding:2.5rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;">
+          <p class="eyebrow">Nodes</p>
+          <h2 style="margin:0.25rem 0 1.5rem; color:#fff;">Warehouses</h2>
+          <div style="background:rgba(255,255,255,0.03); border-radius:20px; overflow:hidden; border:1px solid var(--line);">
             <table class="data-table" style="margin:0;">
               <thead><tr><th>Code</th><th>Name</th><th>Address</th></tr></thead>
               <tbody id="warehouses-body"><tr><td colspan="3" style="color:var(--muted); text-align:center; padding:2rem;">Loading...</td></tr></tbody>
             </table>
           </div>
           
-          <div style="margin-top:2.5rem; padding:1.5rem; background:rgba(20,111,116,0.03); border-radius:20px; border:1px dashed var(--line);">
-            <p class="eyebrow" style="margin-bottom:1rem;">Add New Warehouse</p>
+          <div style="margin-top:3rem; padding:2rem; background:rgba(20,111,116,0.02); border-radius:24px; border:1px dashed var(--line);">
+            <p class="eyebrow" style="margin-bottom:1.5rem;">Provision New Warehouse</p>
             <div id="wh-status" class="status" style="margin-bottom:1rem;"></div>
             <form id="wh-form" class="form-stack">
               <div class="field"><label>Short Code</label><input id="wh-code" maxlength="10" placeholder="e.g. WH2" required></div>
               <div class="field"><label>Name</label><input id="wh-name" maxlength="80" required></div>
               <div class="field"><label>Address</label><input id="wh-address"></div>
-              <button class="button button-primary" type="submit" style="width:100%; margin-top:0.5rem;">Create Warehouse</button>
+              <button class="button button-primary" type="submit" style="width:100%; margin-top:1rem;">Enable Node</button>
             </form>
           </div>
         </section>
 
         <!-- Locations -->
-        <section class="panel" style="padding:2rem;">
-          <p class="eyebrow" style="background:rgba(20,111,116,0.1); color:var(--teal);">Configuration</p>
-          <h2 style="margin:0.25rem 0 1.5rem; color:var(--teal-deep);">Locations</h2>
-          <div style="background:rgba(255,255,255,0.4); border-radius:16px; overflow:hidden; border:1px solid var(--line);">
+        <section class="panel" style="padding:2.5rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards;">
+          <p class="eyebrow">Inventory</p>
+          <h2 style="margin:0.25rem 0 1.5rem; color:#fff;">Locations</h2>
+          <div style="background:rgba(255,255,255,0.03); border-radius:20px; overflow:hidden; border:1px solid var(--line);">
             <table class="data-table" style="margin:0;">
               <thead><tr><th>Warehouse</th><th>Code</th><th>Name</th><th>Kind</th></tr></thead>
               <tbody id="locations-body"><tr><td colspan="4" style="color:var(--muted); text-align:center; padding:2rem;">Loading...</td></tr></tbody>
             </table>
           </div>
 
-          <div style="margin-top:2.5rem; padding:1.5rem; background:rgba(20,111,116,0.03); border-radius:20px; border:1px dashed var(--line);">
-            <p class="eyebrow" style="margin-bottom:1rem;">Add New Location</p>
+          <div style="margin-top:3rem; padding:2rem; background:rgba(20,111,116,0.02); border-radius:24px; border:1px dashed var(--line);">
+            <p class="eyebrow" style="margin-bottom:1.5rem;">Provision New Location</p>
             <div id="loc-status" class="status" style="margin-bottom:1rem;"></div>
             <form id="loc-form" class="form-stack">
               <div class="field"><label>Short Code</label><input id="loc-code" maxlength="30" placeholder="e.g. STOCK3" required></div>
@@ -99,7 +101,7 @@
                   <option value="Outbound">Outbound</option>
                 </select>
               </div>
-              <button class="button button-primary" type="submit" style="width:100%; margin-top:0.5rem;">Create Location</button>
+              <button class="button button-primary" type="submit" style="width:100%; margin-top:1rem;">Register Location</button>
             </form>
           </div>
         </section>

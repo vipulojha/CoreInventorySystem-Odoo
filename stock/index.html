@@ -71,31 +71,35 @@
     </table>
   </main>
 
-  <!-- Adjust Modal -->
-  <div class="modal-backdrop" id="adj-modal">
+  <!-- Unified Adjustment Modal -->
+  <div id="adj-modal-overlay" class="modal-overlay">
     <div class="modal">
-      <h3>Stock Adjustment</h3>
-      <p class="sub" id="adj-sub">Physical count correction</p>
-      <input type="hidden" id="adj-product-id">
-      <input type="hidden" id="adj-location-id">
-      <div class="stack">
-        <label class="field">
-          <span>Current System Quantity</span>
-          <input id="adj-current" readonly>
-        </label>
-        <label class="field">
-          <span>Actual Physical Count</span>
-          <input id="adj-actual" type="number" min="0" required>
-        </label>
-        <label class="field">
-          <span>Reason (optional)</span>
-          <input id="adj-note" placeholder="e.g. Cycle count, damage write-off">
-        </label>
+      <div class="modal-header">
+        <h2 style="margin:0; color:var(--teal-deep);">Stock Adjustment</h2>
+        <button class="button button-ghost" onclick="closeAdjModal()" style="min-height:unset; padding:0.5rem 1rem; border-radius:10px;">Close</button>
       </div>
-      <div id="adj-status" class="status" style="margin-top:0.75rem;"></div>
-      <div class="actions">
-        <button class="button button-primary" id="adj-confirm" type="button">Apply Adjustment</button>
-        <button class="button button-ghost" id="adj-cancel" type="button">Cancel</button>
+      <div class="modal-body">
+        <p id="adj-sub" style="font-weight:700; margin-bottom:1.5rem; color:var(--muted);"></p>
+        <input type="hidden" id="adj-product-id">
+        <input type="hidden" id="adj-location-id">
+        <div class="stack">
+          <label class="field">
+            <span>Current System Quantity</span>
+            <input id="adj-current" readonly style="background:rgba(0,0,0,0.03);">
+          </label>
+          <label class="field">
+            <span>Actual Physical Count</span>
+            <input id="adj-actual" type="number" min="0" required>
+          </label>
+          <label class="field">
+            <span>Reason (optional)</span>
+            <input id="adj-note" placeholder="e.g. Cycle count, damage write-off">
+          </label>
+        </div>
+        <div id="adj-status" class="status" style="margin-top:1rem;"></div>
+        <div class="actions" style="margin-top:2rem;">
+          <button class="button button-primary" id="adj-confirm" type="button" style="width:100%;">Apply Adjustment</button>
+        </div>
       </div>
     </div>
   </div>
@@ -110,10 +114,8 @@
       setTimeout(() => { el.className = "status"; }, 4000);
     }
 
-    function showAdjStatus(msg, type) {
-      const el = document.getElementById("adj-status");
-      el.className = `status visible ${type}`;
-      el.textContent = msg;
+    function closeAdjModal() {
+      document.getElementById("adj-modal-overlay").classList.remove("active");
     }
 
     window.openAdj = function(productId, locationId, productName, onHand) {
@@ -124,7 +126,7 @@
       document.getElementById("adj-actual").value = onHand;
       document.getElementById("adj-note").value = "";
       document.getElementById("adj-status").className = "status";
-      document.getElementById("adj-modal").classList.add("open");
+      document.getElementById("adj-modal-overlay").classList.add("active");
     };
 
     function loadStock() {
@@ -133,7 +135,8 @@
         .then(data => {
           stockData = data || [];
           const tbody = document.getElementById("stock-table-body");
-          const user = JSON.parse(localStorage.getItem("coreinventory.user") || "{}");
+          const userString = localStorage.getItem("coreinventory.user");
+          const user = userString ? JSON.parse(userString) : {};
           const isAdmin = user.role === "admin";
           if (!data || data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No stock found</td></tr>';
@@ -172,7 +175,7 @@
             body: JSON.stringify({ product_id: document.getElementById("adj-product-id").value, location_id: document.getElementById("adj-location-id").value, actual_qty: actual, note: document.getElementById("adj-note").value })
           });
           const data = await res.json();
-          if (res.ok) { document.getElementById("adj-modal").classList.remove("open"); showStatus(data.message, "success"); loadStock(); }
+          if (res.ok) { closeAdjModal(); showStatus(data.message, "success"); loadStock(); }
           else { showAdjStatus(data.message, "error"); }
         } catch(e) { showAdjStatus(e.message, "error"); }
       });

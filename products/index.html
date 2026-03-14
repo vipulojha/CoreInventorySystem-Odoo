@@ -78,46 +78,53 @@
     </table>
   </main>
 
-  <!-- Buy / Discard Modal -->
-  <div class="modal-backdrop" id="action-modal">
+  <!-- Unified Modal System -->
+  <div id="action-modal-overlay" class="modal-overlay">
     <div class="modal">
-      <h3 id="action-modal-title">Buy Product</h3>
-      <p class="sub" id="action-modal-sub"></p>
-      <input type="hidden" id="action-modal-pid">
-      <input type="hidden" id="action-modal-type">
-      <div class="stack">
-        <label class="field">
-          <span>Quantity</span>
-          <div class="qty-row">
-            <button class="button button-ghost btn-sm" type="button" onclick="adjustQty(-1)">−</button>
-            <input id="action-qty" type="number" min="1" value="1">
-            <button class="button button-ghost btn-sm" type="button" onclick="adjustQty(1)">+</button>
-          </div>
-        </label>
-        <label class="field"><span>Note (optional)</span><input id="action-note" placeholder="e.g. for Conference Room 3"></label>
+      <div class="modal-header">
+        <h2 id="action-modal-title" style="margin:0; color:var(--teal-deep);">Buy Product</h2>
+        <button class="button button-ghost" onclick="closeActionModal()" style="min-height:unset; padding:0.5rem 1rem; border-radius:10px;">Close</button>
       </div>
-      <div id="action-status" class="status" style="margin-top:0.75rem;"></div>
-      <div class="actions">
-        <button class="button button-primary" id="action-confirm" type="button">Confirm</button>
-        <button class="button button-ghost" id="action-cancel" type="button">Cancel</button>
+      <div class="modal-body">
+        <p id="action-modal-sub" style="font-weight:700; margin-bottom:1rem; color:var(--muted);"></p>
+        <input type="hidden" id="action-modal-pid">
+        <input type="hidden" id="action-modal-type">
+        <div class="stack">
+          <label class="field">
+            <span>Quantity</span>
+            <div class="qty-row">
+              <button class="button button-ghost btn-sm" type="button" onclick="adjustQty(-1)" style="min-height:42px;">−</button>
+              <input id="action-qty" type="number" min="1" value="1" style="height:42px;">
+              <button class="button button-ghost btn-sm" type="button" onclick="adjustQty(1)" style="min-height:42px;">+</button>
+            </div>
+          </label>
+          <label class="field"><span>Note (optional)</span><input id="action-note" placeholder="e.g. for Conference Room 3"></label>
+        </div>
+        <div id="action-status" class="status" style="margin-top:1rem;"></div>
+        <div class="actions" style="margin-top:2rem;">
+          <button class="button button-primary" id="action-confirm" type="button" style="width:100%;">Confirm Action</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Admin Add/Edit Modal -->
-  <div class="modal-backdrop" id="edit-modal">
+  <div id="edit-modal-overlay" class="modal-overlay">
     <div class="modal">
-      <h3 id="edit-modal-title">Add Product</h3>
-      <div class="stack" style="margin-top:1rem;">
-        <input type="hidden" id="edit-id">
-        <label class="field"><span>SKU</span><input id="edit-sku" maxlength="32" required placeholder="e.g. CHAIR002"></label>
-        <label class="field"><span>Name</span><input id="edit-name" maxlength="120" required placeholder="e.g. Ergonomic Chair"></label>
-        <label class="field"><span>Unit Cost (₹)</span><input id="edit-cost" type="number" min="0" step="0.01" value="0"></label>
+      <div class="modal-header">
+        <h2 id="edit-modal-title" style="margin:0; color:var(--teal-deep);">Add Product</h2>
+        <button class="button button-ghost" onclick="closeEditModal()" style="min-height:unset; padding:0.5rem 1rem; border-radius:10px;">Close</button>
       </div>
-      <div id="edit-status" class="status" style="margin-top:0.75rem;"></div>
-      <div class="actions">
-        <button class="button button-primary" id="edit-save" type="button">Save</button>
-        <button class="button button-ghost" id="edit-cancel" type="button">Cancel</button>
+      <div class="modal-body">
+        <div class="stack">
+          <input type="hidden" id="edit-id">
+          <label class="field"><span>SKU</span><input id="edit-sku" maxlength="32" required placeholder="e.g. CHAIR002"></label>
+          <label class="field"><span>Name</span><input id="edit-name" maxlength="120" required placeholder="e.g. Ergonomic Chair"></label>
+          <label class="field"><span>Unit Cost (₹)</span><input id="edit-cost" type="number" min="0" step="0.01" value="0"></label>
+        </div>
+        <div id="edit-status" class="status" style="margin-top:1rem;"></div>
+        <div class="actions" style="margin-top:2rem;">
+          <button class="button button-primary" id="edit-save" type="button" style="width:100%;">Save Product</button>
+        </div>
       </div>
     </div>
   </div>
@@ -171,6 +178,13 @@
       renderProducts(q ? allProducts.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) : allProducts);
     }
 
+    function closeActionModal() {
+      document.getElementById("action-modal-overlay").classList.remove("active");
+    }
+    function closeEditModal() {
+      document.getElementById("edit-modal-overlay").classList.remove("active");
+    }
+
     window.openAction = function(pid, pname, type) {
       document.getElementById("action-modal-pid").value = pid;
       document.getElementById("action-modal-type").value = type;
@@ -179,29 +193,19 @@
       document.getElementById("action-qty").value = 1;
       document.getElementById("action-note").value = "";
       document.getElementById("action-status").className = "status";
-      document.getElementById("action-confirm").textContent = type === "buy" ? "Place Order" : "Discard";
-      document.getElementById("action-confirm").style.background = type === "buy" ? "" : "linear-gradient(135deg,var(--amber),#a0670f)";
-      document.getElementById("action-modal").classList.add("open");
+      document.getElementById("action-confirm").textContent = type === "buy" ? "Place Order" : "Confirm Discard";
+      document.getElementById("action-confirm").style.background = type === "buy" ? "" : "linear-gradient(135deg,var(--danger),#8b3a1a)";
+      document.getElementById("action-modal-overlay").classList.add("active");
     };
 
     window.openEdit = function(id, sku, name, cost) {
-      document.getElementById("edit-modal-title").textContent = "Edit Product";
+      document.getElementById("edit-modal-title").textContent = id ? "Edit Product" : "Add Product";
       document.getElementById("edit-id").value = id;
       document.getElementById("edit-sku").value = sku;
       document.getElementById("edit-name").value = name;
       document.getElementById("edit-cost").value = cost;
       document.getElementById("edit-status").className = "status";
-      document.getElementById("edit-modal").classList.add("open");
-    };
-
-    window.deleteProduct = async function(id, name) {
-      if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-      try {
-        const res = await fetch(`/api/inventory/products?id=${id}`, { method: "DELETE" });
-        const data = await res.json();
-        showStatus(data.message, res.ok ? "success" : "error");
-        if (res.ok) loadProducts();
-      } catch(e) { showStatus(e.message, "error"); }
+      document.getElementById("edit-modal-overlay").classList.add("active");
     };
 
     async function confirmAction() {
@@ -219,7 +223,7 @@
         });
         const data = await res.json();
         if (res.ok) {
-          document.getElementById("action-modal").classList.remove("open");
+          closeActionModal();
           showStatus(data.message, "success");
           loadProducts();
         } else {
@@ -236,7 +240,7 @@
       try {
         const res = await fetch("/api/inventory/products", { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         const data = await res.json();
-        if (res.ok) { document.getElementById("edit-modal").classList.remove("open"); showStatus(data.message, "success"); loadProducts(); }
+        if (res.ok) { closeEditModal(); showStatus(data.message, "success"); loadProducts(); }
         else { showModalStatus("edit-status", data.message, "error"); }
       } catch(e) { showModalStatus("edit-status", e.message, "error"); }
     }
@@ -255,11 +259,9 @@
       const logoutBtn = document.getElementById("logout-button");
       if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
       document.getElementById("search-input").addEventListener("input", applySearch);
-      document.getElementById("btn-add").addEventListener("click", () => { document.getElementById("edit-modal-title").textContent = "Add Product"; document.getElementById("edit-id").value = ""; document.getElementById("edit-sku").value = ""; document.getElementById("edit-name").value = ""; document.getElementById("edit-cost").value = "0"; document.getElementById("edit-status").className = "status"; document.getElementById("edit-modal").classList.add("open"); });
+      document.getElementById("btn-add").addEventListener("click", () => { openEdit("","","","0"); });
       document.getElementById("action-confirm").addEventListener("click", confirmAction);
-      document.getElementById("action-cancel").addEventListener("click", () => document.getElementById("action-modal").classList.remove("open"));
       document.getElementById("edit-save").addEventListener("click", saveProduct);
-      document.getElementById("edit-cancel").addEventListener("click", () => document.getElementById("edit-modal").classList.remove("open"));
       loadProducts();
     });
   </script>

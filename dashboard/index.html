@@ -60,24 +60,117 @@
       </article>
     </section>
 
-    <section style="margin-top: 2rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;">
-      <div class="card" style="text-align:center; padding:1.5rem;">
+    <section id="stats-grid" style="margin-top: 2rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;">
+      <div class="card stat-card" data-type="products" style="text-align:center; padding:1.5rem; cursor:pointer;">
         <h2 id="stat-products" style="margin:0; font-size:2.5rem; color:var(--teal);">0</h2>
         <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Total Products</p>
       </div>
-      <div class="card" style="text-align:center; padding:1.5rem;">
+      <div class="card stat-card" data-type="low-stock" style="text-align:center; padding:1.5rem; cursor:pointer;">
         <h2 id="stat-low-stock" style="margin:0; font-size:2.5rem; color:var(--danger);">0</h2>
         <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Low Stock Items</p>
       </div>
-      <div class="card" style="text-align:center; padding:1.5rem;">
+      <div class="card stat-card" data-type="receipts" style="text-align:center; padding:1.5rem; cursor:pointer;">
         <h2 id="stat-receipts" style="margin:0; font-size:2.5rem; color:var(--amber);">0</h2>
         <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Pending Receipts</p>
       </div>
-      <div class="card" style="text-align:center; padding:1.5rem;">
+      <div class="card stat-card" data-type="deliveries" style="text-align:center; padding:1.5rem; cursor:pointer;">
         <h2 id="stat-deliveries" style="margin:0; font-size:2.5rem; color:var(--success);">0</h2>
         <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Pending Deliveries</p>
       </div>
     </section>
+
+    <!-- Modal for details -->
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-title" style="margin:0; color:var(--teal-deep);">Details</h2>
+          <button class="button button-ghost" onclick="closeModal()" style="min-height:unset; padding:0.5rem 1rem; border-radius:10px;">Close</button>
+        </div>
+        <div class="modal-body" id="modal-content">
+          <p class="muted">Loading details...</p>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <script>
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+    }
+
+    document.querySelectorAll('.stat-card').forEach(card => {
+      card.addEventListener('click', async () => {
+        const type = card.dataset.type;
+        const titleMap = {
+          'products': 'All Products',
+          'low-stock': 'Low Stock Inventory',
+          'receipts': 'Pending Receipts (Inbound)',
+          'deliveries': 'Pending Deliveries (Outbound)'
+        };
+        
+        document.getElementById('modal-title').textContent = titleMap[type];
+        document.getElementById('modal-content').innerHTML = '<p class="muted">Loading data...</p>';
+        document.getElementById('modal-overlay').classList.add('active');
+
+        try {
+          if (type === 'products') {
+            const res = await fetch('/api/inventory/products');
+            const data = await res.json();
+            renderTable(data, ['SKU', 'Name', 'Category', 'Unit'], ['sku', 'name', 'category', 'uom']);
+          } else if (type === 'low-stock') {
+            const res = await fetch('/api/inventory/stock');
+            const data = await res.json();
+            const filtered = data.filter(d => d.on_hand <= 10);
+            renderTable(filtered, ['Product', 'Warehouse', 'Location', 'On Hand'], ['product_name', 'warehouse_name', 'location_code', 'on_hand']);
+          } else if (type === 'receipts' || type === 'deliveries') {
+            const res = await fetch('/api/inventory/operations');
+            const data = await res.json();
+            const opType = type === 'receipts' ? 'Receipt' : 'Delivery';
+            const filtered = data.filter(d => d.operation_type === opType && d.status !== 'Done' && d.status !== 'Cancelled');
+            renderTable(filtered, ['Ref', 'Contact', 'Date', 'Status'], ['reference', 'contact_name', 'schedule_date', 'status']);
+          }
+        } catch (err) {
+          document.getElementById('modal-content').innerHTML = `<p style="color:var(--danger)">Error loading data: ${err.message}</p>`;
+        }
+      });
+    });
+
+    function renderTable(data, headers, keys) {
+      if (!data || data.length === 0) {
+        document.getElementById('modal-content').innerHTML = '<p class="muted">No items found.</p>';
+        return;
+      }
+      let html = '<table class="data-table"><thead><tr>';
+      headers.forEach(h => html += `<th>${h}</th>`);
+      html += '</tr></thead><tbody>';
+      data.forEach(row => {
+        html += '<tr>';
+        keys.forEach(k => html += `<td>${row[k] || '—'}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('modal-content').innerHTML = html;
+    }
+
+    // Update stats on load
+    async function updateDashboardStats() {
+      try {
+        const [prodRes, stockRes, opRes] = await Promise.all([
+          fetch('/api/inventory/products'),
+          fetch('/api/inventory/stock'),
+          fetch('/api/inventory/operations')
+        ]);
+        const prods = await prodRes.json();
+        const stock = await stockRes.json();
+        const ops = await opRes.json();
+
+        document.getElementById('stat-products').textContent = prods.length;
+        document.getElementById('stat-low-stock').textContent = stock.filter(s => s.on_hand <= 10).length;
+        document.getElementById('stat-receipts').textContent = ops.filter(o => o.operation_type === 'Receipt' && o.status !== 'Done' && o.status !== 'Cancelled').length;
+        document.getElementById('stat-deliveries').textContent = ops.filter(o => o.operation_type === 'Delivery' && o.status !== 'Done' && o.status !== 'Cancelled').length;
+      } catch (e) { console.error("Stat update failed", e); }
+    }
+    document.addEventListener('DOMContentLoaded', updateDashboardStats);
+  </script>
 </body>
 </html>

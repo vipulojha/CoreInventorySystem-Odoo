@@ -52,48 +52,56 @@
 
       <div class="settings-grid">
         <!-- Warehouses -->
-        <section class="panel">
-          <p class="eyebrow">Configuration</p>
-          <h2 style="margin:0.25rem 0 1rem;">Warehouses</h2>
-          <table class="data-table">
-            <thead><tr><th>Code</th><th>Name</th><th>Address</th></tr></thead>
-            <tbody id="warehouses-body"><tr><td colspan="3" style="color:var(--muted)">Loading...</td></tr></tbody>
-          </table>
-          <hr style="border:none; border-top:1px solid var(--line); margin:1.5rem 0;">
-          <p class="eyebrow">Add Warehouse</p>
-          <div id="wh-status" class="status" style="margin-bottom:0.75rem;"></div>
-          <form id="wh-form" class="form-stack">
-            <label class="field"><span>Short Code</span><input id="wh-code" maxlength="10" placeholder="e.g. WH2" required></label>
-            <label class="field"><span>Name</span><input id="wh-name" maxlength="80" required></label>
-            <label class="field"><span>Address</span><input id="wh-address"></label>
-            <button class="button button-primary" type="submit">Create Warehouse</button>
-          </form>
+        <section class="panel" style="padding:2rem;">
+          <p class="eyebrow" style="background:rgba(20,111,116,0.1); color:var(--teal);">Configuration</p>
+          <h2 style="margin:0.25rem 0 1.5rem; color:var(--teal-deep);">Warehouses</h2>
+          <div style="background:rgba(255,255,255,0.4); border-radius:16px; overflow:hidden; border:1px solid var(--line);">
+            <table class="data-table" style="margin:0;">
+              <thead><tr><th>Code</th><th>Name</th><th>Address</th></tr></thead>
+              <tbody id="warehouses-body"><tr><td colspan="3" style="color:var(--muted); text-align:center; padding:2rem;">Loading...</td></tr></tbody>
+            </table>
+          </div>
+          
+          <div style="margin-top:2.5rem; padding:1.5rem; background:rgba(20,111,116,0.03); border-radius:20px; border:1px dashed var(--line);">
+            <p class="eyebrow" style="margin-bottom:1rem;">Add New Warehouse</p>
+            <div id="wh-status" class="status" style="margin-bottom:1rem;"></div>
+            <form id="wh-form" class="form-stack">
+              <div class="field"><label>Short Code</label><input id="wh-code" maxlength="10" placeholder="e.g. WH2" required></div>
+              <div class="field"><label>Name</label><input id="wh-name" maxlength="80" required></div>
+              <div class="field"><label>Address</label><input id="wh-address"></div>
+              <button class="button button-primary" type="submit" style="width:100%; margin-top:0.5rem;">Create Warehouse</button>
+            </form>
+          </div>
         </section>
 
         <!-- Locations -->
-        <section class="panel">
-          <p class="eyebrow">Configuration</p>
-          <h2 style="margin:0.25rem 0 1rem;">Locations</h2>
-          <table class="data-table">
-            <thead><tr><th>Warehouse</th><th>Code</th><th>Name</th><th>Kind</th></tr></thead>
-            <tbody id="locations-body"><tr><td colspan="4" style="color:var(--muted)">Loading...</td></tr></tbody>
-          </table>
-          <hr style="border:none; border-top:1px solid var(--line); margin:1.5rem 0;">
-          <p class="eyebrow">Add Location</p>
-          <div id="loc-status" class="status" style="margin-bottom:0.75rem;"></div>
-          <form id="loc-form" class="form-stack">
-            <label class="field"><span>Short Code</span><input id="loc-code" maxlength="30" placeholder="e.g. STOCK3" required></label>
-            <label class="field"><span>Name</span><input id="loc-name" maxlength="80" required></label>
-            <label class="field"><span>Warehouse</span><select id="loc-wh"><option value="">Select...</option></select></label>
-            <label class="field"><span>Kind</span>
-              <select id="loc-kind">
-                <option value="Stock">Stock</option>
-                <option value="Inbound">Inbound</option>
-                <option value="Outbound">Outbound</option>
-              </select>
-            </label>
-            <button class="button button-primary" type="submit">Create Location</button>
-          </form>
+        <section class="panel" style="padding:2rem;">
+          <p class="eyebrow" style="background:rgba(20,111,116,0.1); color:var(--teal);">Configuration</p>
+          <h2 style="margin:0.25rem 0 1.5rem; color:var(--teal-deep);">Locations</h2>
+          <div style="background:rgba(255,255,255,0.4); border-radius:16px; overflow:hidden; border:1px solid var(--line);">
+            <table class="data-table" style="margin:0;">
+              <thead><tr><th>Warehouse</th><th>Code</th><th>Name</th><th>Kind</th></tr></thead>
+              <tbody id="locations-body"><tr><td colspan="4" style="color:var(--muted); text-align:center; padding:2rem;">Loading...</td></tr></tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:2.5rem; padding:1.5rem; background:rgba(20,111,116,0.03); border-radius:20px; border:1px dashed var(--line);">
+            <p class="eyebrow" style="margin-bottom:1rem;">Add New Location</p>
+            <div id="loc-status" class="status" style="margin-bottom:1rem;"></div>
+            <form id="loc-form" class="form-stack">
+              <div class="field"><label>Short Code</label><input id="loc-code" maxlength="30" placeholder="e.g. STOCK3" required></div>
+              <div class="field"><label>Name</label><input id="loc-name" maxlength="80" required></div>
+              <div class="field"><label>Warehouse</label><select id="loc-wh"><option value="">Select...</option></select></div>
+              <div class="field"><label>Kind</label>
+                <select id="loc-kind">
+                  <option value="Stock">Stock</option>
+                  <option value="Inbound">Inbound</option>
+                  <option value="Outbound">Outbound</option>
+                </select>
+              </div>
+              <button class="button button-primary" type="submit" style="width:100%; margin-top:0.5rem;">Create Location</button>
+            </form>
+          </div>
         </section>
       </div>
     </div>

@@ -212,9 +212,13 @@
       if (!qty || qty < 1) { showModalStatus("action-status", "Enter a valid quantity.", "error"); return; }
       showModalStatus("action-status", "Processing...", "info");
       try {
+        const token = localStorage.getItem("coreinventory.token");
         const res = await fetch("/api/inventory/buy", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify({ product_id: pid, quantity: qty, action: type, note })
         });
         const data = await res.json();

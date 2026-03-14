@@ -66,8 +66,8 @@ module.exports = asyncHandler(async (req, res) => {
         if (newStatus === "Done") {
           const lines = await client.query(`select ol.id, ol.product_id, ol.quantity from inventory_operation_line ol where ol.operation_id = $1`, [op.id]);
           for (const line of lines.rows) {
-            const mk = op.operation_type === "Receipt" ? "IN" : (op.operation_type === "Delivery" ? "OUT" : "ADJUST");
-            await client.query(`insert into stock_move (operation_id, operation_line_id, reference, product_id, warehouse_id, from_location_id, to_location_id, quantity, move_kind, performed_by_user_id, note) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,1,'Validated')`, [op.id, line.id, ref, line.product_id, op.warehouse_id, op.from_location_id, op.to_location_id, line.quantity, mk]);
+            const userId = getUserIdFromReq(req) || 1;
+            await client.query(`insert into stock_move (operation_id, operation_line_id, reference, product_id, warehouse_id, from_location_id, to_location_id, quantity, move_kind, performed_by_user_id, note) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'Validated')`, [op.id, line.id, ref, line.product_id, op.warehouse_id, op.from_location_id, op.to_location_id, line.quantity, mk, userId]);
             if (mk === "IN") await client.query(`insert into stock_balance (warehouse_id, location_id, product_id, on_hand, allocated) values ($1, $2, $3, $4, 0) on conflict (warehouse_id, location_id, product_id) do update set on_hand = stock_balance.on_hand + $4, updated_at = now()`, [op.warehouse_id, op.to_location_id, line.product_id, line.quantity]);
             else if (mk === "OUT") await client.query(`update stock_balance set on_hand = greatest(0, on_hand - $1), updated_at = now() where warehouse_id=$2 and location_id=$3 and product_id=$4`, [line.quantity, op.warehouse_id, op.from_location_id, line.product_id]);
           }
@@ -91,14 +91,16 @@ module.exports = asyncHandler(async (req, res) => {
 
         const seqRes = await client.query("select nextval('operation_reference_seq') as seq");
         const seq = String(seqRes.rows[0].seq).padStart(4, "0");
+        const userId = getUserIdFromReq(req) || 1; // Fallback for emergency, but should be JWT
+
         if (action === "buy") {
            const ref = `WH/IN/${seq}`;
-           const opId = (await client.query(`insert into inventory_operation (reference, operation_type, status, warehouse_id, to_location_id, contact_name, schedule_date, notes, created_by_user_id) values ($1, 'Receipt', 'Draft', $2, $3, 'User Order', current_date, $4, 1) returning id`, [ref, warehouseId, locationId, note])).rows[0].id;
+           const opId = (await client.query(`insert into inventory_operation (reference, operation_type, status, warehouse_id, to_location_id, contact_name, schedule_date, notes, created_by_user_id) values ($1, 'Receipt', 'Draft', $2, $3, 'User Order', current_date, $4, $5) returning id`, [ref, warehouseId, locationId, note, userId])).rows[0].id;
            await client.query(`insert into inventory_operation_line (operation_id, product_id, quantity, unit_cost, note) select $1, $2, $3, unit_cost, 'User buy' from product where id=$2`, [opId, product_id, quantity]);
            return { ref, type: "Receipt" };
         } else {
            const ref = `WH/DISC/${seq}`;
-           await client.query(`insert into stock_move (reference, product_id, warehouse_id, from_location_id, quantity, move_kind, note, performed_by_user_id) values ($1, $2, $3, $4, $5, 'OUT', $6, 1)`, [ref, product_id, warehouseId, locationId, quantity, note]);
+           await client.query(`insert into stock_move (reference, product_id, warehouse_id, from_location_id, quantity, move_kind, note, performed_by_user_id) values ($1, $2, $3, $4, $5, 'OUT', $6, $7)`, [ref, product_id, warehouseId, locationId, quantity, note, userId]);
            await client.query(`update stock_balance set on_hand = greatest(0, on_hand - $1), updated_at = now() where warehouse_id=$2 and location_id=$3 and product_id=$4`, [quantity, warehouseId, locationId, product_id]);
            return { ref, type: "Discard" };
         }
@@ -111,10 +113,11 @@ module.exports = asyncHandler(async (req, res) => {
       const ref = await withClient(async (client) => {
         const warehouse_id = (await client.query(`select warehouse_id from inventory_location where id=$1`, [from_location_id])).rows[0].warehouse_id;
         const seqRes = await client.query("select nextval('operation_reference_seq') as seq");
+        const userId = getUserIdFromReq(req) || 1;
         const ref = `WH/INT/${String(seqRes.rows[0].seq).padStart(4, "0")}`;
-        const opId = (await client.query(`insert into inventory_operation (reference, operation_type, status, warehouse_id, from_location_id, to_location_id, contact_name, schedule_date, notes, created_by_user_id) values ($1, 'Adjustment', 'Done', $2, $3, $4, 'Internal', current_date, $5, 1) returning id`, [ref, warehouse_id, from_location_id, to_location_id, note])).rows[0].id;
+        const opId = (await client.query(`insert into inventory_operation (reference, operation_type, status, warehouse_id, from_location_id, to_location_id, contact_name, schedule_date, notes, created_by_user_id) values ($1, 'Adjustment', 'Done', $2, $3, $4, 'Internal', current_date, $5, $6) returning id`, [ref, warehouse_id, from_location_id, to_location_id, note, userId])).rows[0].id;
         const lineId = (await client.query(`insert into inventory_operation_line (operation_id, product_id, quantity, unit_cost, note) select $1, $2, $3, unit_cost, 'Transfer' from product where id=$2 returning id`, [opId, product_id, quantity])).rows[0].id;
-        await client.query(`insert into stock_move (operation_id, operation_line_id, reference, product_id, warehouse_id, from_location_id, to_location_id, quantity, move_kind, note, performed_by_user_id) values ($1,$2,$3,$4,$5,$6,$7,$8,'OUT','TR-OUT',1), ($1,$2,$3,$4,$5,$6,$7,$8,'IN','TR-IN',1)`, [opId, lineId, ref, product_id, warehouse_id, from_location_id, to_location_id, quantity]);
+        await client.query(`insert into stock_move (operation_id, operation_line_id, reference, product_id, warehouse_id, from_location_id, to_location_id, quantity, move_kind, note, performed_by_user_id) values ($1,$2,$3,$4,$5,$6,$7,$8,'OUT','TR-OUT',$9), ($1,$2,$3,$4,$5,$6,$7,$8,'IN','TR-IN',$9)`, [opId, lineId, ref, product_id, warehouse_id, from_location_id, to_location_id, quantity, userId]);
         await client.query(`update stock_balance set on_hand = on_hand - $1 where warehouse_id=$2 and location_id=$3 and product_id=$4`, [quantity, warehouse_id, from_location_id, product_id]);
         await client.query(`insert into stock_balance (warehouse_id, location_id, product_id, on_hand) values ($1,$2,$3,$4) on conflict (warehouse_id, location_id, product_id) do update set on_hand = stock_balance.on_hand + $4`, [warehouse_id, to_location_id, product_id, quantity]);
         return ref;

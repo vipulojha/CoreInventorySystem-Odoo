@@ -7,18 +7,19 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { margin-bottom: 1.5rem; }
-    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
-    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
-    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
+    .page-title { margin-bottom: 3rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:24px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.3); border:1px solid var(--line); animation: fadeSlideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    .data-table th, .data-table td { padding:1.25rem 1.5rem; text-align:left; border-bottom:1px solid var(--line); font-size: 0.9rem; }
+    .data-table th { background:rgba(255,255,255,0.02); color:var(--teal); font-weight:800; text-transform:uppercase; font-size:0.7rem; letter-spacing:0.1em; }
     .data-table tr:last-child td { border-bottom:none; }
-    .data-table tbody tr:hover { background:rgba(20,111,116,0.04); cursor:pointer; }
-    .badge { padding:0.2rem 0.5rem; border-radius:999px; font-size:0.73rem; font-weight:800; text-transform:uppercase; }
-    .status-draft { background:rgba(116,102,81,0.15); color:var(--muted); }
-    .status-ready { background:rgba(20,111,116,0.15); color:var(--teal-deep); }
-    .status-done { background:rgba(47,109,68,0.15); color:var(--success); }
-    .status-waiting { background:rgba(201,130,28,0.15); color:var(--amber); }
-    .status-cancelled { background:rgba(170,86,53,0.15); color:var(--danger); }
+    .data-table tbody tr:hover { background:rgba(255,255,255,0.04); cursor:pointer; }
+    .badge { padding:0.4rem 1rem; border-radius:99px; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; border: 1px solid transparent; }
+    .status-draft { background:rgba(143, 163, 173, 0.1); color:var(--muted); border-color: rgba(143, 163, 173, 0.2); }
+    .status-ready { background:rgba(0, 210, 255, 0.1); color:var(--teal); border-color: rgba(0, 210, 255, 0.2); }
+    .status-done { background:rgba(0, 242, 96, 0.1); color:var(--success); border-color: rgba(0, 242, 96, 0.2); }
+    .status-waiting { background:rgba(248, 181, 0, 0.1); color:var(--amber); border-color: rgba(248, 181, 0, 0.2); }
+    .status-cancelled { background:rgba(255, 75, 43, 0.1); color:var(--danger); border-color: rgba(255, 75, 43, 0.2); }
+
   </style>
 </head>
 <body>
@@ -42,9 +43,9 @@
     </header>
 
     <div class="page-title">
-      <p class="eyebrow">Your Activity</p>
-      <h1 style="margin:0.25rem 0 0.5rem;">My Orders</h1>
-      <p class="muted">All buy requests and operations you have placed. Click any row to view details.</p>
+      <p class="eyebrow">Personal Pipeline</p>
+      <h1 style="margin:0.25rem 0 0.75rem; font-family:var(--font-display); font-size: 3.5rem; letter-spacing: -0.03em; color:#fff;">My Orders</h1>
+      <p class="muted" style="max-width: 600px; font-size: 1.1rem;">Track your requisition status and fulfillment progress in real-time.</p>
     </div>
 
     <table class="data-table">

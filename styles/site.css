@@ -45,6 +45,18 @@ a:hover {
   color: var(--teal-deep);
 }
 
+.link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--teal);
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--teal-deep);
+}
+
 button,
 input {
   font: inherit;

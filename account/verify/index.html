@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Verify OTP - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css">
-  <script src="/scripts/auth.js" defer></script>
+  <link rel="stylesheet" href="/styles/site.css?v=3">
+  <script src="/scripts/auth.js?v=3" defer></script>
 </head>
 <body>
   <main class="shell">
@@ -31,7 +34,7 @@
           </label>
           <button class="button button-primary" type="submit">Verify OTP</button>
         </form>
-        <p><a href="/account/register/">Need a new OTP? Register again</a></p>
+        <p><button class="link-button" type="button" data-nav="/account/register/">Need a new OTP? Register again</button></p>
       </section>
     </section>
   </main>

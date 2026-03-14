@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Sign In - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css">
-  <script src="/scripts/auth.js" defer></script>
+  <link rel="stylesheet" href="/styles/site.css?v=3">
+  <script src="/scripts/auth.js?v=3" defer></script>
 </head>
 <body>
   <main class="shell">
@@ -32,8 +35,8 @@
           <button class="button button-primary" type="submit">Sign In</button>
         </form>
         <div class="grid-two">
-          <a class="button button-ghost" href="/account/register/">Create account</a>
-          <a class="button button-ghost" href="/account/verify/">Verify OTP</a>
+          <button class="button button-ghost" type="button" data-nav="/account/register/">Create account</button>
+          <button class="button button-ghost" type="button" data-nav="/account/verify/">Verify OTP</button>
         </div>
       </section>
     </section>

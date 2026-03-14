@@ -3,8 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/site.css?v=3">
+  <script src="/scripts/auth.js?v=3" defer></script>
 </head>
 <body>
   <main class="shell">
@@ -14,8 +18,8 @@
         <h1>CoreInventory</h1>
         <p class="muted">Email OTP signup is now live on this Vercel deployment. New visitors can register, verify their email, and sign in from the browser.</p>
         <div class="button-row">
-          <a class="button button-primary" href="/account/register/">Create account</a>
-          <a class="button button-ghost" href="/account/login/">Sign in</a>
+          <button class="button button-primary" type="button" data-nav="/account/register/">Create account</button>
+          <button class="button button-ghost" type="button" data-nav="/account/login/">Sign in</button>
         </div>
       </div>
       <aside class="hero-card">

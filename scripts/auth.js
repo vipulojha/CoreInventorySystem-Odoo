@@ -1,5 +1,19 @@
 const byId = (id) => document.getElementById(id);
 
+function initNavigation() {
+  document.querySelectorAll("[data-nav]").forEach((element) => {
+    element.addEventListener("click", (event) => {
+      event.preventDefault();
+      const target = element.getAttribute("data-nav");
+      if (!target) {
+        return;
+      }
+
+      window.location.assign(target);
+    });
+  });
+}
+
 function showStatus(element, type, message) {
   if (!element) {
     return;
@@ -176,6 +190,7 @@ function initDashboardPage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initNavigation();
   initRegisterPage();
   initVerifyPage();
   initLoginPage();

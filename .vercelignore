@@ -1,0 +1,25 @@
+# .vercelignore
+# Ignore .NET related files and folders to keep serverless function count low
+bin/
+obj/
+Controllers/
+Data/
+Extensions/
+Models/
+Options/
+Properties/
+Services/
+ViewModels/
+Views/
+wwwroot/
+CoreInventory.csproj
+Program.cs
+appsettings.json
+appsettings.Development.json
+*.suo
+*.user
+LICENSE
+CHANGELOG.md
+README.md
+readme.md
+# Keep api/ and other HTML/CSS/JS folders

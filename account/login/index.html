@@ -3,42 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>Sign In - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css?v=3">
-  <script src="/scripts/auth.js?v=3" defer></script>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
+  <style>
+    body { background: radial-gradient(circle at top left, hsla(var(--h), 70%, 40%, 0.12), transparent 40%), var(--bg); }
+    .auth-layout { align-items: center; min-height: 80vh; }
+    .hero-card { background: linear-gradient(145deg, hsla(var(--h), 70%, 25%, 0.95), #1a3c40); animation: fadeSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .hero-card h1 { font-family: var(--font-display); font-size: 3.5rem; line-height: 1; margin: 1rem 0; }
+    .panel { animation: fadeSlideUp 1s ease-out; padding: 2.5rem; }
+    .field input { background: rgba(255,255,255,0.6); backdrop-filter: blur(4px); }
+    .brand-float { position: absolute; top: 2rem; left: 2rem; animation: fadeSlideUp 0.6s ease-out; }
+  </style>
 </head>
 <body>
+  <div class="brand-float">
+    <div class="brand">
+      <span class="brand-mark">CI</span>
+      <strong style="color:var(--teal-deep); font-size: 1.1rem;">CoreInventory</strong>
+    </div>
+  </div>
+  
   <main class="shell">
-    <section class="auth-layout">
+    <section class="auth-layout" style="margin-top: 4rem;">
       <section class="hero-card">
-        <p class="eyebrow">Welcome back</p>
-        <h1>Sign in</h1>
-        <p class="muted">Access your CoreInventory workspace. Please sign in with your verified credentials to continue managing your stock operations.</p>
+        <p class="eyebrow" style="color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1);">Verified Access</p>
+        <h1>Welcome back</h1>
+        <p style="font-size: 1.1rem; opacity: 0.9;">CoreInventory Enterprise Workspace. Manage your global stock movements with precision and clarity.</p>
+        <div style="margin-top: 2rem; display: flex; gap: 0.5rem; opacity: 0.6; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
+          <span>SECURE</span> • <span>REAL-TIME</span> • <span>EFFICIENT</span>
+        </div>
       </section>
 
       <section class="panel">
-        <p class="eyebrow">Access</p>
-        <h2>Login</h2>
-        <div id="login-status" class="status"></div>
+        <p class="eyebrow">Enterprise Identity</p>
+        <h2 style="margin: 0.25rem 0 1.5rem; font-weight: 800;">Sign In</h2>
+        <div id="login-status" class="status" style="margin-bottom: 1.25rem;"></div>
         <form id="login-form" class="stack">
           <label class="field">
             <span>Login ID</span>
-            <input id="loginLoginId" required>
+            <input id="loginLoginId" placeholder="e.g. vipulojha" required>
           </label>
           <label class="field">
             <span>Password</span>
-            <input id="loginPassword" type="password" required>
+            <input id="loginPassword" type="password" placeholder="••••••••" required>
           </label>
-          <button class="button button-primary" type="submit">Sign In</button>
+          <button class="button button-primary" type="submit" style="margin-top: 0.5rem; width: 100%;">Continue to Workspace</button>
         </form>
-        <div style="margin-top: 1.5rem; text-align: center;">
-          <button class="button button-ghost" type="button" data-nav="/account/register/">Create account</button>
+        <div style="margin-top: 2rem; text-align: center; border-top: 1px solid var(--line); padding-top: 1.5rem;">
+          <p class="muted" style="font-size: 0.9rem; margin-bottom: 1rem;">New to the platform?</p>
+          <button class="button button-ghost" type="button" data-nav="/account/register/" style="width: 100%;">Create Enterprise Account</button>
         </div>
       </section>
     </section>
   </main>
 </body>
 </html>
+

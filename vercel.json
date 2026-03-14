@@ -1,3 +1,23 @@
 {
-  "version": 2
+  "version": 2,
+  "functions": {
+    "api/**/*.js": { "memory": 1024, "maxDuration": 10 }
+  },
+  "rewrites": [
+    { "source": "/api/auth/register/(.*)", "destination": "/api/auth/register.js" },
+    { "source": "/api/inventory/stock", "destination": "/api/inventory/stock.js" },
+    { "source": "/api/inventory/adjust", "destination": "/api/inventory/stock.js" },
+    { "source": "/api/inventory/alert-low-stock", "destination": "/api/inventory/stock.js" },
+    { "source": "/api/inventory/operations", "destination": "/api/inventory/operations.js" },
+    { "source": "/api/inventory/operation-detail", "destination": "/api/inventory/operations.js" },
+    { "source": "/api/inventory/transition", "destination": "/api/inventory/operations.js" },
+    { "source": "/api/inventory/buy", "destination": "/api/inventory/operations.js" },
+    { "source": "/api/inventory/transfer", "destination": "/api/inventory/operations.js" },
+    { "source": "/api/inventory/my-orders", "destination": "/api/inventory/operations.js" },
+    { "source": "/api/inventory/locations", "destination": "/api/inventory/metadata.js" },
+    { "source": "/api/inventory/warehouses", "destination": "/api/inventory/metadata.js" }
+  ]
 }
+
+
+

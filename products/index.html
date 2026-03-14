@@ -7,28 +7,22 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { margin-bottom: 1.5rem; }
-    .toolbar { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
-    .search-input { flex:1; min-width:180px; padding:0.6rem 1rem; border-radius:14px; border:1px solid rgba(130,117,95,0.26); background:rgba(255,255,255,0.92); font:inherit; }
-    .search-input:focus { outline:none; border-color:rgba(20,111,116,0.5); box-shadow:0 0 0 3px rgba(20,111,116,0.1); }
-    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
-    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
-    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
-    .data-table tr:last-child td { border-bottom:none; }
-    .data-table td:last-child { white-space:nowrap; }
-    .btn-sm { padding:0.3rem 0.65rem; border-radius:8px; border:none; cursor:pointer; font:inherit; font-size:0.82rem; font-weight:700; }
-    .btn-buy { background:rgba(20,111,116,0.12); color:var(--teal-deep); }
-    .btn-buy:hover { background:rgba(20,111,116,0.22); }
-    .btn-discard { background:rgba(201,130,28,0.12); color:var(--amber); margin-left:0.4rem; }
-    .btn-discard:hover { background:rgba(201,130,28,0.22); }
-    .btn-edit { background:rgba(20,111,116,0.08); color:var(--teal-deep); margin-left:0.4rem; }
-    .btn-edit:hover { background:rgba(20,111,116,0.18); }
-    .btn-del { background:rgba(170,86,53,0.12); color:var(--danger); margin-left:0.4rem; }
-    .btn-del:hover { background:rgba(170,86,53,0.22); }
-    /* Modal */
-    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.38); z-index:100; align-items:center; justify-content:center; }
-    .modal-backdrop.open { display:flex; }
-    .modal { background:var(--panel); border-radius:var(--radius); padding:2rem; width:min(460px,90vw); box-shadow:var(--shadow); backdrop-filter:blur(16px); }
+    .page-title { margin-bottom: 2rem; animation: fadeSlideUp 0.6s ease-out; }
+    .toolbar { display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; animation: fadeSlideUp 0.8s ease-out; }
+    .search-input { flex:1; min-width:240px; padding:0.75rem 1.25rem; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,0.7); backdrop-filter:blur(8px); font:inherit; transition: all 0.3s ease; }
+    .search-input:focus { outline:none; border-color:var(--teal); background:#fff; box-shadow:0 8px 20px rgba(0,0,0,0.04); }
+    .data-table { animation: fadeSlideUp 1s ease-out; }
+    .btn-action { padding:0.4rem 0.8rem; border-radius:10px; border:none; cursor:pointer; font:inherit; font-size:0.8rem; font-weight:700; transition: all 0.2s ease; }
+    .btn-buy { background:hsla(var(--h), 70%, 40%, 0.1); color:var(--teal); }
+    .btn-buy:hover { background:var(--teal); color:#fff; transform: translateY(-2px); }
+    .btn-discard { background:rgba(201, 130, 28, 0.1); color:var(--amber); margin-left:0.4rem; }
+    .btn-discard:hover { background:var(--amber); color:#fff; transform: translateY(-2px); }
+    .btn-edit { background:rgba(0,0,0,0.05); color:var(--muted); margin-left:0.4rem; }
+    .btn-edit:hover { background:var(--text); color:#fff; transform: translateY(-2px); }
+    .btn-del { background:rgba(170, 86, 53, 0.1); color:var(--danger); margin-left:0.4rem; }
+    .btn-del:hover { background:var(--danger); color:#fff; transform: translateY(-2px); }
+    /* Modal Enhancement */
+    .modal { animation: fadeSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .modal h3 { margin:0 0 0.25rem; }
     .modal .sub { color:var(--muted); font-size:0.9rem; margin:0 0 1.25rem; }
     .modal .stack { display:grid; gap:0.75rem; }
@@ -164,10 +158,10 @@
         </td>
         <td>₹${parseFloat(p.unit_cost).toLocaleString()}</td>
         <td>
-          <button class="btn-sm btn-buy" onclick="openAction(${p.id},'${p.name.replace(/'/g,"\\'")}','buy')">Buy</button>
-          <button class="btn-sm btn-discard" onclick="openAction(${p.id},'${p.name.replace(/'/g,"\\'")}','discard')">Discard</button>
-          ${isAdmin ? `<button class="btn-sm btn-edit" onclick="openEdit(${p.id},'${p.sku}','${p.name.replace(/'/g,"\\'")}',${p.unit_cost})">Edit</button>
-                       <button class="btn-sm btn-del" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')">Delete</button>` : ""}
+          <button class="btn-action btn-buy" onclick="openAction(${p.id},'${p.name.replace(/'/g,"\\'")}','buy')">Buy</button>
+          <button class="btn-action btn-discard" onclick="openAction(${p.id},'${p.name.replace(/'/g,"\\'")}','discard')">Discard</button>
+          ${isAdmin ? `<button class="btn-action btn-edit" onclick="openEdit(${p.id},'${p.sku}','${p.name.replace(/'/g,"\\'")}',${p.unit_cost})">Edit</button>
+                       <button class="btn-action btn-del" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')">Delete</button>` : ""}
         </td>
       </tr>`).join("");
     }

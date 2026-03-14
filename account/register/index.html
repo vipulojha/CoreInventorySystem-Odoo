@@ -3,58 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>Create Account - CoreInventory</title>
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
+  <style>
+    body { background: radial-gradient(circle at top left, hsla(var(--h), 70%, 40%, 0.12), transparent 40%), var(--bg); }
+    .auth-layout { align-items: flex-start; min-height: 80vh; }
+    .hero-card { background: linear-gradient(145deg, hsla(var(--h), 70%, 25%, 0.95), #1a3c40); animation: fadeSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .hero-card h1 { font-family: var(--font-display); font-size: 3rem; line-height: 1.1; margin: 1rem 0; }
+    .panel { animation: fadeSlideUp 1s ease-out; padding: 2rem; }
+    .field input { background: rgba(255,255,255,0.6); backdrop-filter: blur(4px); }
+    .brand-float { position: absolute; top: 2rem; left: 2rem; animation: fadeSlideUp 0.6s ease-out; }
+    .mini-list { list-style: none; padding: 0; margin-top: 1.5rem; opacity: 0.8; font-size: 0.9rem; }
+    .mini-list li { margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.6rem; }
+    .mini-list li::before { content: "✓"; color: #fff; background: rgba(255,255,255,0.15); width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; font-size: 0.7rem; font-weight: 900; }
+  </style>
 </head>
 <body>
+  <div class="brand-float">
+    <div class="brand">
+      <span class="brand-mark">CI</span>
+      <strong style="color:var(--teal-deep); font-size: 1.1rem;">CoreInventory</strong>
+    </div>
+  </div>
+
   <main class="shell">
-    <section class="auth-layout">
+    <section class="auth-layout" style="margin-top: 4rem;">
       <section class="hero-card">
-        <p class="eyebrow">New operator</p>
-        <h1>Create your account</h1>
-        <p class="muted">Register with your login ID, display name, email, and password. For security purposes, an email verification is required before your account is activated for use with the Inventory Management System.</p>
+        <p class="eyebrow" style="color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1);">New Operator</p>
+        <h1>Secure Registration</h1>
+        <p style="font-size: 1rem; opacity: 0.9;">Join the Enterprise workspace. Your account grants access to the global supply chain management suite.</p>
         <ul class="mini-list">
-          <li>Login ID: 3–30 chars, letters, numbers, @, dot, _</li>
-          <li>Login ID and email must be unique</li>
-          <li>Password must meet the policy</li>
-          <li>OTP expires automatically</li>
+          <li>Universal ID: Alphanumeric, @, dot, _, -</li>
+          <li>Enterprise Security: Encrypted password policy</li>
+          <li>Two-Factor Ready: OTP verification required</li>
+          <li>Role-Based: Managed by system administrators</li>
         </ul>
       </section>
 
       <section class="panel">
-        <p class="eyebrow">Access setup</p>
-        <h2>Register</h2>
-        <div id="register-status" class="status"></div>
+        <p class="eyebrow">Onboarding</p>
+        <h2 style="margin: 0.25rem 0 1.25rem; font-weight: 800;">Register</h2>
+        <div id="register-status" class="status" style="margin-bottom: 1rem;"></div>
         <form id="register-form" class="stack">
           <label class="field">
             <span>Login ID</span>
             <input id="loginId" maxlength="30" required placeholder="e.g. Vipul@1860">
           </label>
-          <label class="field">
-            <span>Display Name</span>
-            <input id="displayName" maxlength="80" required>
-          </label>
-          <label class="field">
-            <span>Email Address</span>
-            <input id="email" type="email" required>
-          </label>
+          <div class="grid-two">
+            <label class="field"><span>Display Name</span><input id="displayName" maxlength="80" required placeholder="Your full name"></label>
+            <label class="field"><span>Email Address</span><input id="email" type="email" required placeholder="you@company.com"></label>
+          </div>
           <label class="field">
             <span>Password</span>
-            <input id="password" type="password" required>
+            <input id="password" type="password" required placeholder="••••••••">
           </label>
           <label class="field">
             <span>Confirm Password</span>
-            <input id="confirmPassword" type="password" required>
+            <input id="confirmPassword" type="password" required placeholder="••••••••">
           </label>
-          <button class="button button-primary" type="submit">Send OTP</button>
+          <button class="button button-primary" type="submit" style="margin-top: 0.5rem; width: 100%;">Create Account & Send OTP</button>
         </form>
-        <p><button class="link-button" type="button" data-nav="/account/login/">Back to sign in</button></p>
+        <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--line); padding-top: 1.25rem;">
+          <p class="muted" style="font-size: 0.9rem; margin-bottom: 0.75rem;">Already have an account?</p>
+          <button class="button button-ghost" type="button" data-nav="/account/login/" style="width: 100%;">Sign In Instead</button>
+        </div>
       </section>
     </section>
   </main>
 </body>
 </html>
+

@@ -30,11 +30,15 @@
       </nav>
     </header>
 
-    <section class="hero">
+    <section class="hero" style="background: linear-gradient(135deg, hsla(var(--h), 70%, 40%, 0.1), hsla(35, 70%, 50%, 0.1)), var(--panel); position: relative; overflow: hidden;">
+      <!-- Mesh Gradient Elements -->
+      <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, hsla(var(--h), 70%, 40%, 0.2), transparent 70%); border-radius: 50%; filter: blur(40px); pointer-events: none;"></div>
+      <div style="position: absolute; bottom: -50px; right: -50px; width: 250px; height: 250px; background: radial-gradient(circle, hsla(35, 70%, 50%, 0.15), transparent 70%); border-radius: 50%; filter: blur(60px); pointer-events: none;"></div>
+      
       <div class="hero-copy">
-        <p class="eyebrow">Operator Dashboard</p>
-        <h1 id="dashboard-name">Admin Operator</h1>
-        <p class="muted">Welcome to your secure workspace. CoreInventory provides real-time visibility into your warehouse operations and catalog data.</p>
+        <p class="eyebrow" style="background: rgba(20, 111, 116, 0.1); color: var(--teal); border-radius: 99px; padding: 0.25rem 0.75rem; display: inline-block;">Operator Dashboard</p>
+        <h1 id="dashboard-name" style="color: var(--teal-deep); font-weight: 800; letter-spacing: -0.03em;">Admin Operator</h1>
+        <p class="muted" style="font-size: 1.1rem; max-width: 600px;">Welcome to your secure workspace. CoreInventory provides real-time visibility into your warehouse operations and catalog data.</p>
       </div>
     </section>
 

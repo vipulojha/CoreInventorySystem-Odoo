@@ -7,21 +7,18 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { margin-bottom: 1.5rem; }
-    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
-    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
-    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
-    .data-table tr:last-child td { border-bottom:none; }
-    .data-table tbody tr:hover { background:rgba(20,111,116,0.05); cursor:pointer; }
-    .badge { padding:0.2rem 0.5rem; border-radius:999px; font-size:0.73rem; font-weight:800; text-transform:uppercase; }
-    .status-draft { background:rgba(116,102,81,0.15); color:var(--muted); }
-    .status-ready { background:rgba(20,111,116,0.15); color:var(--teal-deep); }
-    .status-done { background:rgba(47,109,68,0.15); color:var(--success); }
-    .status-waiting { background:rgba(201,130,28,0.15); color:var(--amber); }
-    .status-cancelled { background:rgba(170,86,53,0.15); color:var(--danger); }
-    .filter-row { display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; align-items:center; }
-    .filter-row select { padding:0.55rem 0.9rem; border-radius:12px; border:1px solid rgba(130,117,95,0.26); background:rgba(255,255,255,0.92); font:inherit; }
-    .hint { font-size:0.82rem; color:var(--muted); margin-top:0.6rem; }
+    .page-title { margin-bottom: 2rem; animation: fadeSlideUp 0.6s ease-out; }
+    .filter-row { display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; align-items:center; animation: fadeSlideUp 0.8s ease-out; }
+    .filter-row select { padding:0.75rem 1.25rem; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,0.7); backdrop-filter:blur(8px); font:inherit; cursor:pointer; transition: all 0.3s ease; }
+    .filter-row select:focus { outline:none; border-color:var(--teal); background:#fff; box-shadow:0 8px 20px rgba(0,0,0,0.04); }
+    .data-table { animation: fadeSlideUp 1s ease-out; }
+    .badge { padding:0.25rem 0.75rem; border-radius:99px; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; }
+    .status-draft { background:rgba(116, 102, 81, 0.1); color:var(--muted); }
+    .status-ready { background:hsla(var(--h), 70%, 40%, 0.1); color:var(--teal); }
+    .status-done { background:rgba(47, 109, 68, 0.1); color:var(--success); }
+    .status-waiting { background:rgba(201, 130, 28, 0.1); color:var(--amber); }
+    .status-cancelled { background:rgba(170, 86, 53, 0.1); color:var(--danger); }
+    .hint { font-size:0.85rem; color:var(--muted); margin-top:1rem; animation: fadeSlideUp 1.2s ease-out; }
   </style>
 </head>
 <body>

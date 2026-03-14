@@ -30,52 +30,68 @@
       </nav>
     </header>
 
-    <section class="hero" style="background: linear-gradient(135deg, hsla(var(--h), 70%, 40%, 0.1), hsla(35, 70%, 50%, 0.1)), var(--panel); position: relative; overflow: hidden;">
-      <!-- Mesh Gradient Elements -->
-      <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, hsla(var(--h), 70%, 40%, 0.2), transparent 70%); border-radius: 50%; filter: blur(40px); pointer-events: none;"></div>
-      <div style="position: absolute; bottom: -50px; right: -50px; width: 250px; height: 250px; background: radial-gradient(circle, hsla(35, 70%, 50%, 0.15), transparent 70%); border-radius: 50%; filter: blur(60px); pointer-events: none;"></div>
+    <section class="hero" style="position: relative; overflow: hidden; border-color: rgba(0, 210, 255, 0.1);">
+      <div class="hero-copy" style="z-index: 10; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+        <p class="eyebrow" style="animation: fadeSlideUp 0.6s ease-out;">Operations Dashboard</p>
+        <h1 id="dashboard-name" style="font-family: var(--font-display); font-size: clamp(3rem, 8vw, 5rem); line-height: 0.95; margin: 1rem 0 2rem; letter-spacing: -0.03em; color: #fff;">Inventory <br><span style="color: var(--teal); filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));">Redefined.</span></h1>
+        <p class="muted" style="font-size: 1.25rem; max-width: 500px; line-height: 1.5; margin-bottom: 2.5rem;">Manage your global catalog with surgical precision. Real-time stock, streamlined operations, and insightful analytics.</p>
+        <div style="display: flex; gap: 1.25rem;">
+          <button class="button button-primary" data-nav="/operations/" style="padding: 0 3rem;">Live Operations</button>
+          <button class="button button-ghost" data-nav="/products/">Browse Catalog</button>
+        </div>
+      </div>
       
-      <div class="hero-copy">
-        <p class="eyebrow" style="background: rgba(20, 111, 116, 0.1); color: var(--teal); border-radius: 99px; padding: 0.25rem 0.75rem; display: inline-block;">Operator Dashboard</p>
-        <h1 id="dashboard-name" style="color: var(--teal-deep); font-weight: 800; letter-spacing: -0.03em;">Admin Operator</h1>
-        <p class="muted" style="font-size: 1.1rem; max-width: 600px;">Welcome to your secure workspace. CoreInventory provides real-time visibility into your warehouse operations and catalog data.</p>
-      </div>
+      <article class="hero-card" style="position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 3rem; border-radius: 32px; background: linear-gradient(145deg, #112d31, #090e11); box-shadow: 0 30px 100px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); animation: fadeSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;">
+        <div style="position: absolute; top: -20%; right: -20%; width: 80%; height: 80%; background: radial-gradient(circle, rgba(0, 210, 255, 0.1) 0%, transparent 70%);"></div>
+        <p class="eyebrow" style="color: rgba(255,255,255,0.6); font-size: 0.6rem;">Status Snapshot</p>
+        <h3 style="margin: 0; font-size: 2rem; font-weight: 800; color: #fff;">System Healthy</h3>
+        <p class="muted" style="margin-top: 0.5rem; font-size: 0.95rem;">All nodes synchronized. Database latency &lt; 5ms.</p>
+        <div style="margin-top: 2rem; padding: 1.5rem; border-radius: 20px; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--teal);">UPTIME</span>
+            <span style="font-size: 1.2rem; font-weight: 900; color: #fff;">99.99%</span>
+          </div>
+          <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 0.75rem;">
+            <div style="width: 99.9%; height: 100%; background: var(--teal); border-radius: 10px; box-shadow: 0 0 10px var(--teal);"></div>
+          </div>
+        </div>
+      </article>
     </section>
 
-    <section class="dashboard-grid">
-      <article class="card" onclick="window.location.href='/products/'" style="cursor:pointer; border:1px solid var(--teal);">
+    <section class="dashboard-grid" style="margin-top: 3rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+      <article class="card" onclick="window.location.href='/products/'" style="cursor: pointer; padding: 2.5rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;">
         <p class="eyebrow">Products</p>
-        <h3>Manage Catalog</h3>
-        <p>Keep track of SKUs, categories, and unit measurements across all your registered locations.</p>
+        <h3 style="color: #fff; font-size: 1.5rem; margin: 0.5rem 0;">Manage Catalog</h3>
+        <p class="muted">Keep track of SKUs, categories, and unit measurements across all your registered locations.</p>
       </article>
-      <article class="card" onclick="window.location.href='/operations/'" style="cursor:pointer; border:1px solid var(--amber);">
-        <p class="eyebrow">Operations</p>
-        <h3>Track Movements</h3>
-        <p>Receive goods from vendors, deliver to customers, and execute internal warehouse transfers.</p>
+      <article class="card" onclick="window.location.href='/operations/'" style="cursor: pointer; padding: 2.5rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards;">
+        <p class="eyebrow" style="color: var(--amber); border-color: rgba(248, 181, 0, 0.2); background: rgba(248, 181, 0, 0.1);">Operations</p>
+        <h3 style="color: #fff; font-size: 1.5rem; margin: 0.5rem 0;">Track Movements</h3>
+        <p class="muted">Receive goods from vendors, deliver to customers, and execute internal warehouse transfers.</p>
       </article>
-      <article class="card" onclick="window.location.href='/stock/'" style="cursor:pointer; border:1px solid var(--success);">
-        <p class="eyebrow">Inventory</p>
-        <h3>Live Stock Accuracy</h3>
-        <p>Perform physical counts, handle adjustments, and monitor low stock alerts in real-time.</p>
+      <article class="card" onclick="window.location.href='/stock/'" style="cursor: pointer; padding: 2.5rem; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s backwards;">
+        <p class="eyebrow" style="color: var(--success); border-color: rgba(0, 242, 96, 0.2); background: rgba(0, 242, 96, 0.1);">Inventory</p>
+        <h3 style="color: #fff; font-size: 1.5rem; margin: 0.5rem 0;">Live Stock Accuracy</h3>
+        <p class="muted">Perform physical counts, handle adjustments, and monitor low stock alerts in real-time.</p>
       </article>
     </section>
 
-    <section id="stats-grid" style="margin-top: 2rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;">
-      <div class="card stat-card" data-type="products" style="text-align:center; padding:1.5rem; cursor:pointer;">
-        <h2 id="stat-products" style="margin:0; font-size:2.5rem; color:var(--teal);">0</h2>
-        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Total Products</p>
+    <section id="stats-grid" style="margin-top: 3rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+      <div class="card stat-card" data-type="products" style="text-align: center; padding: 2rem; cursor: pointer; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s backwards;">
+        <h2 id="stat-products" style="margin: 0; font-size: 3.5rem; color: #fff; font-weight: 900;">0</h2>
+        <p class="muted" style="margin: 0; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal);">Total Products</p>
       </div>
-      <div class="card stat-card" data-type="low-stock" style="text-align:center; padding:1.5rem; cursor:pointer;">
-        <h2 id="stat-low-stock" style="margin:0; font-size:2.5rem; color:var(--danger);">0</h2>
-        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Low Stock Items</p>
+      <div class="card stat-card" data-type="low-stock" style="text-align: center; padding: 2rem; cursor: pointer; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.7s backwards;">
+        <h2 id="stat-low-stock" style="margin: 0; font-size: 3.5rem; color: var(--danger); font-weight: 900;">0</h2>
+        <p class="muted" style="margin: 0; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">Low Stock Items</p>
       </div>
-      <div class="card stat-card" data-type="receipts" style="text-align:center; padding:1.5rem; cursor:pointer;">
-        <h2 id="stat-receipts" style="margin:0; font-size:2.5rem; color:var(--amber);">0</h2>
-        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Pending Receipts</p>
+      <div class="card stat-card" data-type="receipts" style="text-align: center; padding: 2rem; cursor: pointer; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s backwards;">
+        <h2 id="stat-receipts" style="margin: 0; font-size: 3.5rem; color: var(--amber); font-weight: 900;">0</h2>
+        <p class="muted" style="margin: 0; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">Pending Receipts</p>
       </div>
-      <div class="card stat-card" data-type="deliveries" style="text-align:center; padding:1.5rem; cursor:pointer;">
-        <h2 id="stat-deliveries" style="margin:0; font-size:2.5rem; color:var(--success);">0</h2>
-        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Pending Deliveries</p>
+      <div class="card stat-card" data-type="deliveries" style="text-align: center; padding: 2rem; cursor: pointer; animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s backwards;">
+        <h2 id="stat-deliveries" style="margin: 0; font-size: 3.5rem; color: var(--success); font-weight: 900;">0</h2>
+        <p class="muted" style="margin: 0; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">Pending Deliveries</p>
       </div>
     </section>
 

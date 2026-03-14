@@ -32,8 +32,7 @@ You may notice that the **PostgreSQL Database** itself is not "stored" in this r
 ## 🚀 Deployment
 
 This project is optimized for deployment on **Vercel**. Every navigation route and API endpoint is precisely mapped in `vercel.json` to ensure a frictionless user experience across all web browsers.
-deployment link-https://coreinventorysystem-odoo-dtkwe7fpe-vipulojha1860-9512s-projects.vercel.app?_vercel_share=BVw5Zw1gcWlRv9BL655TRgXwsnrIgjFH
-
+deployment link-https://coreinventorysystem-odoo.vercel.app?_vercel_share=JuuaOE1EEhObZIU1mrVk3GZ6W6wD82ga
 ---
 
 

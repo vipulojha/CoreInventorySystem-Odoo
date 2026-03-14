@@ -17,17 +17,24 @@
     .data-table tr:last-child td { border-bottom:none; }
     .data-table td:last-child { white-space:nowrap; }
     .btn-sm { padding:0.3rem 0.65rem; border-radius:8px; border:none; cursor:pointer; font:inherit; font-size:0.82rem; font-weight:700; }
-    .btn-edit { background:rgba(20,111,116,0.12); color:var(--teal-deep); }
-    .btn-edit:hover { background:rgba(20,111,116,0.22); }
+    .btn-buy { background:rgba(20,111,116,0.12); color:var(--teal-deep); }
+    .btn-buy:hover { background:rgba(20,111,116,0.22); }
+    .btn-discard { background:rgba(201,130,28,0.12); color:var(--amber); margin-left:0.4rem; }
+    .btn-discard:hover { background:rgba(201,130,28,0.22); }
+    .btn-edit { background:rgba(20,111,116,0.08); color:var(--teal-deep); margin-left:0.4rem; }
+    .btn-edit:hover { background:rgba(20,111,116,0.18); }
     .btn-del { background:rgba(170,86,53,0.12); color:var(--danger); margin-left:0.4rem; }
     .btn-del:hover { background:rgba(170,86,53,0.22); }
     /* Modal */
-    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.38); z-index:100; align-items:center; justify-content:center; }
     .modal-backdrop.open { display:flex; }
-    .modal { background:var(--panel); border-radius:var(--radius); padding:2rem; width:min(460px,90vw); box-shadow:var(--shadow); }
-    .modal h3 { margin:0 0 1.25rem; }
+    .modal { background:var(--panel); border-radius:var(--radius); padding:2rem; width:min(460px,90vw); box-shadow:var(--shadow); backdrop-filter:blur(16px); }
+    .modal h3 { margin:0 0 0.25rem; }
+    .modal .sub { color:var(--muted); font-size:0.9rem; margin:0 0 1.25rem; }
     .modal .stack { display:grid; gap:0.75rem; }
     .modal .actions { display:flex; gap:0.75rem; margin-top:1.25rem; }
+    .qty-row { display:flex; align-items:center; gap:0.75rem; }
+    .qty-row input { width:90px; padding:0.6rem 1rem; border-radius:14px; border:1px solid rgba(130,117,95,0.26); background:rgba(255,255,255,0.92); font:inherit; font-size:1.1rem; font-weight:700; text-align:center; }
   </style>
 </head>
 <body>
@@ -51,11 +58,11 @@
     <div class="page-title">
       <p class="eyebrow">Catalog</p>
       <h1 style="margin:0.25rem 0 0.5rem;">Product Catalog</h1>
-      <p class="muted">Browse, add, edit, and remove products from your inventory catalog.</p>
+      <p class="muted">Browse products, place buy orders, or discard items. Admins can also add, edit, and remove catalog entries.</p>
     </div>
 
     <div class="toolbar">
-      <input class="search-input" type="search" id="search-input" placeholder="Search by SKU or name…">
+      <input class="search-input" type="search" id="search-input" placeholder="Search products…">
       <button class="button button-primary" id="btn-add" data-admin-only type="button" style="white-space:nowrap;">+ Add Product</button>
     </div>
 
@@ -64,32 +71,57 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>SKU</th>
           <th>Name</th>
           <th>Unit Cost</th>
-          <th data-admin-only></th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="products-table-body">
-        <tr><td colspan="4" style="text-align:center; color:var(--muted);">Loading...</td></tr>
+        <tr><td colspan="3" style="text-align:center; color:var(--muted);">Loading...</td></tr>
       </tbody>
     </table>
   </main>
 
-  <!-- Add / Edit Modal -->
-  <div class="modal-backdrop" id="modal-backdrop">
+  <!-- Buy / Discard Modal -->
+  <div class="modal-backdrop" id="action-modal">
     <div class="modal">
-      <h3 id="modal-title">Add Product</h3>
+      <h3 id="action-modal-title">Buy Product</h3>
+      <p class="sub" id="action-modal-sub"></p>
+      <input type="hidden" id="action-modal-pid">
+      <input type="hidden" id="action-modal-type">
       <div class="stack">
-        <input type="hidden" id="modal-id">
-        <label class="field"><span>SKU</span><input id="modal-sku" maxlength="32" required placeholder="e.g. CHAIR002"></label>
-        <label class="field"><span>Name</span><input id="modal-name" maxlength="120" required placeholder="e.g. Ergonomic Chair"></label>
-        <label class="field"><span>Unit Cost (₹)</span><input id="modal-cost" type="number" min="0" step="0.01" value="0"></label>
+        <label class="field">
+          <span>Quantity</span>
+          <div class="qty-row">
+            <button class="button button-ghost btn-sm" type="button" onclick="adjustQty(-1)">−</button>
+            <input id="action-qty" type="number" min="1" value="1">
+            <button class="button button-ghost btn-sm" type="button" onclick="adjustQty(1)">+</button>
+          </div>
+        </label>
+        <label class="field"><span>Note (optional)</span><input id="action-note" placeholder="e.g. for Conference Room 3"></label>
       </div>
-      <div id="modal-status" class="status" style="margin-top:0.75rem;"></div>
+      <div id="action-status" class="status" style="margin-top:0.75rem;"></div>
       <div class="actions">
-        <button class="button button-primary" id="modal-save" type="button">Save</button>
-        <button class="button button-ghost" id="modal-cancel" type="button">Cancel</button>
+        <button class="button button-primary" id="action-confirm" type="button">Confirm</button>
+        <button class="button button-ghost" id="action-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Add/Edit Modal -->
+  <div class="modal-backdrop" id="edit-modal">
+    <div class="modal">
+      <h3 id="edit-modal-title">Add Product</h3>
+      <div class="stack" style="margin-top:1rem;">
+        <input type="hidden" id="edit-id">
+        <label class="field"><span>SKU</span><input id="edit-sku" maxlength="32" required placeholder="e.g. CHAIR002"></label>
+        <label class="field"><span>Name</span><input id="edit-name" maxlength="120" required placeholder="e.g. Ergonomic Chair"></label>
+        <label class="field"><span>Unit Cost (₹)</span><input id="edit-cost" type="number" min="0" step="0.01" value="0"></label>
+      </div>
+      <div id="edit-status" class="status" style="margin-top:0.75rem;"></div>
+      <div class="actions">
+        <button class="button button-primary" id="edit-save" type="button">Save</button>
+        <button class="button button-ghost" id="edit-cancel" type="button">Cancel</button>
       </div>
     </div>
   </div>
@@ -102,56 +134,68 @@
       const el = document.getElementById("status-msg");
       el.className = `status visible ${type}`;
       el.textContent = msg;
-      setTimeout(() => { el.className = "status"; }, 3500);
+      setTimeout(() => { el.className = "status"; }, 4000);
     }
 
-    function showModalStatus(msg, type) {
-      const el = document.getElementById("modal-status");
+    function showModalStatus(elId, msg, type) {
+      const el = document.getElementById(elId);
       el.className = `status visible ${type}`;
       el.textContent = msg;
     }
+
+    window.adjustQty = function(delta) {
+      const input = document.getElementById("action-qty");
+      input.value = Math.max(1, parseInt(input.value) + delta);
+    };
 
     function renderProducts(data) {
       const tbody = document.getElementById("products-table-body");
       const isAdmin = currentUser && currentUser.role === "admin";
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);">No products found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--muted);">No products found</td></tr>`;
         return;
       }
       tbody.innerHTML = data.map(p => `<tr>
-        <td><strong>${p.sku}</strong></td>
-        <td>${p.name}</td>
+        <td>
+          <strong>${p.name}</strong>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">${p.sku}</div>
+        </td>
         <td>₹${parseFloat(p.unit_cost).toLocaleString()}</td>
-        <td>${isAdmin ? `<button class="btn-sm btn-edit" onclick="openEdit(${p.id},'${p.sku}','${p.name.replace(/'/g,"\\'")}',${p.unit_cost})">Edit</button>
-                        <button class="btn-sm btn-del" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')">Delete</button>` : ""}
+        <td>
+          <button class="btn-sm btn-buy" onclick="openAction(${p.id},'${p.name.replace(/'/g,"\\'")}','buy')">Buy</button>
+          <button class="btn-sm btn-discard" onclick="openAction(${p.id},'${p.name.replace(/'/g,"\\'")}','discard')">Discard</button>
+          ${isAdmin ? `<button class="btn-sm btn-edit" onclick="openEdit(${p.id},'${p.sku}','${p.name.replace(/'/g,"\\'")}',${p.unit_cost})">Edit</button>
+                       <button class="btn-sm btn-del" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')">Delete</button>` : ""}
         </td>
       </tr>`).join("");
     }
 
     function applySearch() {
       const q = document.getElementById("search-input").value.toLowerCase();
-      const filtered = q ? allProducts.filter(p => p.sku.toLowerCase().includes(q) || p.name.toLowerCase().includes(q)) : allProducts;
-      renderProducts(filtered);
+      renderProducts(q ? allProducts.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) : allProducts);
     }
 
-    function openAdd() {
-      document.getElementById("modal-title").textContent = "Add Product";
-      document.getElementById("modal-id").value = "";
-      document.getElementById("modal-sku").value = "";
-      document.getElementById("modal-name").value = "";
-      document.getElementById("modal-cost").value = "0";
-      document.getElementById("modal-status").className = "status";
-      document.getElementById("modal-backdrop").classList.add("open");
-    }
+    window.openAction = function(pid, pname, type) {
+      document.getElementById("action-modal-pid").value = pid;
+      document.getElementById("action-modal-type").value = type;
+      document.getElementById("action-modal-title").textContent = type === "buy" ? "Buy Product" : "Discard Product";
+      document.getElementById("action-modal-sub").textContent = pname;
+      document.getElementById("action-qty").value = 1;
+      document.getElementById("action-note").value = "";
+      document.getElementById("action-status").className = "status";
+      document.getElementById("action-confirm").textContent = type === "buy" ? "Place Order" : "Discard";
+      document.getElementById("action-confirm").style.background = type === "buy" ? "" : "linear-gradient(135deg,var(--amber),#a0670f)";
+      document.getElementById("action-modal").classList.add("open");
+    };
 
     window.openEdit = function(id, sku, name, cost) {
-      document.getElementById("modal-title").textContent = "Edit Product";
-      document.getElementById("modal-id").value = id;
-      document.getElementById("modal-sku").value = sku;
-      document.getElementById("modal-name").value = name;
-      document.getElementById("modal-cost").value = cost;
-      document.getElementById("modal-status").className = "status";
-      document.getElementById("modal-backdrop").classList.add("open");
+      document.getElementById("edit-modal-title").textContent = "Edit Product";
+      document.getElementById("edit-id").value = id;
+      document.getElementById("edit-sku").value = sku;
+      document.getElementById("edit-name").value = name;
+      document.getElementById("edit-cost").value = cost;
+      document.getElementById("edit-status").className = "status";
+      document.getElementById("edit-modal").classList.add("open");
     };
 
     window.deleteProduct = async function(id, name) {
@@ -164,70 +208,62 @@
       } catch(e) { showStatus(e.message, "error"); }
     };
 
-    function closeModal() {
-      document.getElementById("modal-backdrop").classList.remove("open");
-    }
-
-    async function saveProduct() {
-      const id = document.getElementById("modal-id").value;
-      const payload = {
-        id: id || undefined,
-        sku: document.getElementById("modal-sku").value.trim(),
-        name: document.getElementById("modal-name").value.trim(),
-        unit_cost: document.getElementById("modal-cost").value
-      };
-      if (!payload.sku || !payload.name) {
-        showModalStatus("SKU and name are required.", "error");
-        return;
-      }
-      showModalStatus("Saving...", "info");
+    async function confirmAction() {
+      const pid = document.getElementById("action-modal-pid").value;
+      const type = document.getElementById("action-modal-type").value;
+      const qty = parseInt(document.getElementById("action-qty").value);
+      const note = document.getElementById("action-note").value.trim();
+      if (!qty || qty < 1) { showModalStatus("action-status", "Enter a valid quantity.", "error"); return; }
+      showModalStatus("action-status", "Processing...", "info");
       try {
-        const method = id ? "PUT" : "POST";
-        const res = await fetch("/api/inventory/products", {
-          method,
+        const res = await fetch("/api/inventory/buy", {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ product_id: pid, quantity: qty, action: type, note })
         });
         const data = await res.json();
         if (res.ok) {
-          closeModal();
+          document.getElementById("action-modal").classList.remove("open");
           showStatus(data.message, "success");
           loadProducts();
         } else {
-          showModalStatus(data.message, "error");
+          showModalStatus("action-status", data.message, "error");
         }
-      } catch(e) { showModalStatus(e.message, "error"); }
+      } catch(e) { showModalStatus("action-status", e.message, "error"); }
+    }
+
+    async function saveProduct() {
+      const id = document.getElementById("edit-id").value;
+      const payload = { id: id || undefined, sku: document.getElementById("edit-sku").value.trim(), name: document.getElementById("edit-name").value.trim(), unit_cost: document.getElementById("edit-cost").value };
+      if (!payload.sku || !payload.name) { showModalStatus("edit-status", "SKU and name are required.", "error"); return; }
+      showModalStatus("edit-status", "Saving...", "info");
+      try {
+        const res = await fetch("/api/inventory/products", { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (res.ok) { document.getElementById("edit-modal").classList.remove("open"); showStatus(data.message, "success"); loadProducts(); }
+        else { showModalStatus("edit-status", data.message, "error"); }
+      } catch(e) { showModalStatus("edit-status", e.message, "error"); }
     }
 
     function loadProducts() {
       fetch("/api/inventory/products")
         .then(r => r.json())
-        .then(data => {
-          allProducts = data || [];
-          renderProducts(allProducts);
-        }).catch(console.error);
+        .then(data => { allProducts = data || []; renderProducts(allProducts); })
+        .catch(console.error);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       currentUser = requireAuth();
       if (!currentUser) return;
       applyRbac(currentUser);
-
       const logoutBtn = document.getElementById("logout-button");
-      if (logoutBtn) logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("coreinventory.token");
-        localStorage.removeItem("coreinventory.user");
-        window.location.href = "/account/login/";
-      });
-
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { localStorage.removeItem("coreinventory.token"); localStorage.removeItem("coreinventory.user"); window.location.href = "/account/login/"; });
       document.getElementById("search-input").addEventListener("input", applySearch);
-      document.getElementById("btn-add").addEventListener("click", openAdd);
-      document.getElementById("modal-save").addEventListener("click", saveProduct);
-      document.getElementById("modal-cancel").addEventListener("click", closeModal);
-      document.getElementById("modal-backdrop").addEventListener("click", (e) => {
-        if (e.target === document.getElementById("modal-backdrop")) closeModal();
-      });
-
+      document.getElementById("btn-add").addEventListener("click", () => { document.getElementById("edit-modal-title").textContent = "Add Product"; document.getElementById("edit-id").value = ""; document.getElementById("edit-sku").value = ""; document.getElementById("edit-name").value = ""; document.getElementById("edit-cost").value = "0"; document.getElementById("edit-status").className = "status"; document.getElementById("edit-modal").classList.add("open"); });
+      document.getElementById("action-confirm").addEventListener("click", confirmAction);
+      document.getElementById("action-cancel").addEventListener("click", () => document.getElementById("action-modal").classList.remove("open"));
+      document.getElementById("edit-save").addEventListener("click", saveProduct);
+      document.getElementById("edit-cancel").addEventListener("click", () => document.getElementById("edit-modal").classList.remove("open"));
       loadProducts();
     });
   </script>

@@ -1,0 +1,127 @@
+@model OperationIndexViewModel
+@{
+    ViewData["Title"] = "Operations";
+}
+
+<section class="hero-banner hero-banner-compact" data-reveal>
+    <div>
+        <p class="eyebrow">@Model.SelectedType workflow</p>
+        <h2>@Model.SelectedType queue</h2>
+        <p class="muted">Move between list and kanban, spot late work instantly, and push orders forward without leaving the page.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button button-primary" asp-action="Create" asp-route-type="@Model.SelectedType">New @Model.SelectedType</a>
+        <a class="button button-ghost" asp-controller="History" asp-action="Index">Open move history</a>
+    </div>
+</section>
+
+<section class="panel stack-lg" data-reveal>
+    <div class="toolbar">
+        <div class="tab-row">
+            <a class="tab @(Model.SelectedType == OperationTypes.Receipt ? "active" : "")" asp-action="Index" asp-route-type="Receipt">Receipt</a>
+            <a class="tab @(Model.SelectedType == OperationTypes.Delivery ? "active" : "")" asp-action="Index" asp-route-type="Delivery">Delivery</a>
+            <a class="tab @(Model.SelectedType == OperationTypes.Adjustment ? "active" : "")" asp-action="Index" asp-route-type="Adjustment">Adjustment</a>
+        </div>
+
+        <div class="toolbar-actions">
+            <form method="get" asp-action="Index" class="inline-form">
+                <input type="hidden" name="type" value="@Model.SelectedType" />
+                <input type="hidden" name="view" value="@Model.ViewMode" />
+                <input type="search" name="q" value="@Model.Search" placeholder="Search reference or contact" />
+                <button type="submit" class="button button-ghost">Search</button>
+            </form>
+
+            <div class="segmented">
+                <a class="@(Model.ViewMode == "list" ? "active" : "")" asp-action="Index" asp-route-type="@Model.SelectedType" asp-route-q="@Model.Search" asp-route-view="list">List</a>
+                <a class="@(Model.ViewMode == "board" ? "active" : "")" asp-action="Index" asp-route-type="@Model.SelectedType" asp-route-q="@Model.Search" asp-route-view="board">Kanban</a>
+            </div>
+
+            <a class="button button-primary" asp-action="Create" asp-route-type="@Model.SelectedType">New @Model.SelectedType</a>
+        </div>
+    </div>
+
+    <div class="stats-strip">
+        <div><strong>@Model.OpenCount</strong><span>open</span></div>
+        <div><strong>@Model.LateCount</strong><span>late</span></div>
+        <div><strong>@Model.WaitingCount</strong><span>waiting</span></div>
+    </div>
+
+    @if (Model.ViewMode == "board")
+    {
+        <div class="board-grid">
+            @foreach (var status in OperationStatuses.Board)
+            {
+                <section class="board-column" data-reveal>
+                    <header>
+                        <h3>@status</h3>
+                        <span>@Model.Board[status].Count</span>
+                    </header>
+                    <div class="stack">
+                        @if (Model.Board[status].Count == 0)
+                        {
+                            <div class="empty-state compact">
+                                <strong>No orders here yet.</strong>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Board[status])
+                            {
+                                <a class="board-card @(item.IsLate ? "late" : "")" asp-action="Edit" asp-route-id="@item.Id">
+                                    <div class="board-card-head">
+                                        <strong>@item.Reference</strong>
+                                        <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
+                                    </div>
+                                    <p>@item.ContactName</p>
+                                    <small>@item.WarehouseCode - @item.ScheduleDate - @item.LineCount lines</small>
+                                </a>
+                            }
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            @if (Model.Items.Count == 0)
+            {
+                <div class="empty-state">
+                    <strong>No matching operations found.</strong>
+                    <p class="muted">Try a different search or create a new order for this workflow.</p>
+                </div>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Contact</th>
+                        <th>Date</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Status</th>
+                        <th>Lines</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr class="@(item.IsLate ? "row-late" : string.Empty)">
+                            <td><a asp-action="Edit" asp-route-id="@item.Id">@item.Reference</a></td>
+                            <td>@item.ContactName</td>
+                            <td>@item.ScheduleDate</td>
+                            <td>@item.FromLocationLabel</td>
+                            <td>@item.ToLocationLabel</td>
+                            <td><span class="badge @item.Status.ToLowerInvariant()">@item.Status</span></td>
+                            <td>@item.LineCount</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    }
+</section>

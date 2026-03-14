@@ -1,0 +1,123 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="hero-banner" data-reveal>
+    <div>
+        <p class="eyebrow">Live control room</p>
+        <h2>Track receipts, deliveries, stock pressure, and movement in one place.</h2>
+        <p class="muted">The dashboard condenses the workflows from your hackathon brief into a single operating surface.</p>
+    </div>
+    <div class="hero-actions">
+        <a asp-controller="Operations" asp-action="Create" asp-route-type="Receipt" class="button button-primary">New Receipt</a>
+        <a asp-controller="Operations" asp-action="Create" asp-route-type="Delivery" class="button button-ghost">New Delivery</a>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card accent-amber" data-reveal>
+        <p>Receipts</p>
+        <strong>@Model.ReceiptOpenCount</strong>
+        <span>@Model.ReceiptLateCount late</span>
+    </article>
+    <article class="stat-card accent-teal" data-reveal>
+        <p>Deliveries</p>
+        <strong>@Model.DeliveryOpenCount</strong>
+        <span>@Model.DeliveryWaitingCount waiting</span>
+    </article>
+    <article class="stat-card accent-slate" data-reveal>
+        <p>Operations</p>
+        <strong>@Model.TotalOperationCount</strong>
+        <span>Active workflow volume</span>
+    </article>
+    <article class="stat-card accent-rust" data-reveal>
+        <p>Low Stock</p>
+        <strong>@Model.LowStockCount</strong>
+        <span>Rows at or below 5 free units</span>
+    </article>
+</section>
+
+<section class="panel-grid two">
+    <article class="panel" data-reveal>
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Upcoming work</p>
+                <h2>Operations</h2>
+            </div>
+            <a asp-controller="Operations" asp-action="Index" asp-route-type="Receipt" class="button button-ghost">Open queue</a>
+        </div>
+
+        <div class="table-wrap">
+            @if (Model.UpcomingOperations.Count == 0)
+            {
+                <div class="empty-state">
+                    <strong>No operations are queued.</strong>
+                    <p class="muted">Create your first receipt, delivery, or adjustment to start tracking movement.</p>
+                </div>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Type</th>
+                        <th>Contact</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.UpcomingOperations)
+                    {
+                        <tr>
+                            <td><a asp-controller="Operations" asp-action="Edit" asp-route-id="@item.Id">@item.Reference</a></td>
+                            <td>@item.Type</td>
+                            <td>@item.ContactName</td>
+                            <td>@item.ScheduleDate</td>
+                            <td><span class="badge @item.Status.ToLowerInvariant()">@item.Status</span></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </article>
+
+    <article class="panel" data-reveal>
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Attention required</p>
+                <h2>Low stock</h2>
+            </div>
+            <a asp-controller="Stock" asp-action="Index" class="button button-ghost">Open stock</a>
+        </div>
+
+        @if (Model.LowStockItems.Count == 0)
+        {
+            <div class="empty-state">
+                <strong>Nothing is under the low-stock threshold.</strong>
+                <p class="muted">This panel will surface items that fall to 5 free units or lower.</p>
+            </div>
+        }
+        else
+        {
+            <div class="stack">
+                @foreach (var item in Model.LowStockItems)
+                {
+                    <div class="list-card danger">
+                        <div>
+                            <strong>@item.ProductName</strong>
+                            <p>@item.WarehouseCode/@item.LocationCode</p>
+                        </div>
+                        <div class="metric-pair">
+                            <span>On hand: @item.OnHand</span>
+                            <span>Free: @item.FreeToUse</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </article>
+</section>

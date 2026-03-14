@@ -1,0 +1,15 @@
+{
+  "name": "coreinventory-vercel-auth",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vercel-ready Node.js auth APIs for CoreInventory OTP signup.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "jsonwebtoken": "9.0.2",
+    "nodemailer": "6.9.15",
+    "pg": "8.12.0"
+  }
+}

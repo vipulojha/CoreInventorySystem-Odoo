@@ -1,0 +1,65 @@
+@model OperationPrintViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@Model.Reference</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body class="print-body">
+    <main class="print-sheet">
+        <header class="print-head">
+            <div>
+                <p class="eyebrow">@Model.Type</p>
+                <h1>@Model.Reference</h1>
+            </div>
+            <div>
+                <strong>@Model.Status</strong>
+                <p>@Model.ScheduleDate</p>
+            </div>
+        </header>
+
+        <section class="field-grid three print-grid">
+            <div><span class="print-label">Warehouse</span><strong>@Model.WarehouseName</strong></div>
+            <div><span class="print-label">Contact</span><strong>@Model.ContactName</strong></div>
+            <div><span class="print-label">Responsible</span><strong>@Model.Responsible</strong></div>
+            <div><span class="print-label">From</span><strong>@Model.FromLocationLabel</strong></div>
+            <div><span class="print-label">To</span><strong>@Model.ToLocationLabel</strong></div>
+            <div><span class="print-label">Address</span><strong>@(string.IsNullOrWhiteSpace(Model.DeliveryAddress) ? "-" : Model.DeliveryAddress)</strong></div>
+        </section>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Quantity</th>
+                <th>Unit Cost</th>
+                <th>Note</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var line in Model.Lines)
+            {
+                <tr>
+                    <td>@(string.IsNullOrWhiteSpace(line.ProductLabel) ? line.ProductId.ToString() : line.ProductLabel)</td>
+                    <td>@line.Quantity</td>
+                    <td>@line.UnitCost</td>
+                    <td>@line.Note</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <section class="panel print-notes">
+                <h2>Notes</h2>
+                <p>@Model.Notes</p>
+            </section>
+        }
+    </main>
+</body>
+</html>

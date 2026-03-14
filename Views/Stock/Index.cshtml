@@ -1,0 +1,218 @@
+@model StockIndexViewModel
+@{
+    ViewData["Title"] = "Stock";
+}
+
+<section class="hero-banner hero-banner-compact" data-reveal>
+    <div>
+        <p class="eyebrow">Inventory control</p>
+        <h2>Stock command surface</h2>
+        <p class="muted">Manage product masters, post manual adjustments, and keep low-stock pressure visible from one screen.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button button-primary" asp-controller="Operations" asp-action="Create" asp-route-type="Receipt">Receive stock</a>
+        <a class="button button-ghost" asp-controller="Settings" asp-action="Index">Manage locations</a>
+    </div>
+</section>
+
+<section class="panel stack-lg" data-reveal>
+    <div class="toolbar">
+        <div>
+            <p class="eyebrow">Inventory snapshot</p>
+            <h2>Products and stock</h2>
+        </div>
+
+        <form method="get" asp-action="Index" class="inline-form">
+            <input type="search" name="q" value="@Model.Search" placeholder="Search product, SKU, warehouse or location" />
+            <button type="submit" class="button button-ghost">Search</button>
+        </form>
+    </div>
+
+    <div class="panel-grid two">
+        <article class="panel panel-muted" data-reveal>
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Catalog</p>
+                    <h2>@(Model.ProductForm.Id.HasValue ? "Edit product" : "New product")</h2>
+                </div>
+            </div>
+
+            <form asp-action="SaveProduct" method="post" class="stack">
+                @Html.AntiForgeryToken()
+                <input asp-for="ProductForm.Id" type="hidden" />
+
+                <label class="field">
+                    <span>SKU</span>
+                    <input asp-for="ProductForm.Sku" />
+                    <span asp-validation-for="ProductForm.Sku" class="field-error"></span>
+                </label>
+
+                <label class="field">
+                    <span>Name</span>
+                    <input asp-for="ProductForm.Name" />
+                    <span asp-validation-for="ProductForm.Name" class="field-error"></span>
+                </label>
+
+                <label class="field">
+                    <span>Unit Cost</span>
+                    <input asp-for="ProductForm.UnitCost" type="number" min="0" step="0.01" />
+                    <span asp-validation-for="ProductForm.UnitCost" class="field-error"></span>
+                </label>
+
+                <button type="submit" class="button button-primary">Save Product</button>
+            </form>
+
+            <div class="section-head compact space-top">
+                <div>
+                    <p class="eyebrow">Manual movement</p>
+                    <h2>Adjust stock</h2>
+                </div>
+            </div>
+
+            <form asp-action="Adjust" method="post" class="stack">
+                @Html.AntiForgeryToken()
+
+                <label class="field">
+                    <span>Product</span>
+                    <select asp-for="AdjustmentForm.ProductId">
+                        @foreach (var option in Model.ProductOptions)
+                        {
+                            <option value="@option.Value">@option.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="AdjustmentForm.ProductId" class="field-error"></span>
+                </label>
+
+                <div class="field-grid two">
+                    <label class="field">
+                        <span>Warehouse</span>
+                        <select asp-for="AdjustmentForm.WarehouseId" data-location-source>
+                            @foreach (var option in Model.WarehouseOptions)
+                            {
+                                <option value="@option.Value" data-code="@option.Group">@option.Label</option>
+                            }
+                        </select>
+                        <span asp-validation-for="AdjustmentForm.WarehouseId" class="field-error"></span>
+                    </label>
+
+                    <label class="field">
+                        <span>Location</span>
+                        <select asp-for="AdjustmentForm.LocationId" data-location-target>
+                            <option value="">Select location</option>
+                            @foreach (var option in Model.LocationOptions)
+                            {
+                                <option value="@option.Value" data-group="@option.Group">@option.Label</option>
+                            }
+                        </select>
+                        <span asp-validation-for="AdjustmentForm.LocationId" class="field-error"></span>
+                    </label>
+                </div>
+
+                <label class="field">
+                    <span>Quantity Delta</span>
+                    <input asp-for="AdjustmentForm.QuantityDelta" type="number" step="1" />
+                    <span asp-validation-for="AdjustmentForm.QuantityDelta" class="field-error"></span>
+                </label>
+
+                <label class="field">
+                    <span>Note</span>
+                    <input asp-for="AdjustmentForm.Note" />
+                    <span asp-validation-for="AdjustmentForm.Note" class="field-error"></span>
+                </label>
+
+                <button type="submit" class="button button-primary">Post Adjustment</button>
+            </form>
+        </article>
+
+        <article class="panel" data-reveal>
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Available stock</p>
+                    <h2>Balances</h2>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                @if (Model.Balances.Count == 0)
+                {
+                    <div class="empty-state">
+                        <strong>No stock balances to show.</strong>
+                        <p class="muted">Create products and receive or adjust stock to populate this table.</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Warehouse</th>
+                            <th>Location</th>
+                            <th>On hand</th>
+                            <th>Free to use</th>
+                            <th>Unit Cost</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var row in Model.Balances)
+                        {
+                            <tr class="@(row.IsLowStock ? "row-late" : string.Empty)">
+                                <td>
+                                    <strong>@row.ProductName</strong>
+                                    <small>@row.Sku</small>
+                                </td>
+                                <td>@row.WarehouseCode</td>
+                                <td>@row.LocationCode</td>
+                                <td>@row.OnHand</td>
+                                <td>@row.FreeToUse</td>
+                                <td>@row.UnitCost</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="section-head compact space-top">
+                <div>
+                    <p class="eyebrow">Catalog list</p>
+                    <h2>Products</h2>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                @if (Model.Products.Count == 0)
+                {
+                    <div class="empty-state">
+                        <strong>No products exist yet.</strong>
+                        <p class="muted">Use the catalog form on the left to create the first SKU.</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>Unit Cost</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var product in Model.Products)
+                        {
+                            <tr>
+                                <td>@product.Sku</td>
+                                <td>@product.Name</td>
+                                <td>@product.UnitCost</td>
+                                <td><a class="button button-ghost" asp-action="Index" asp-route-productId="@product.Id">Edit</a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </article>
+    </div>
+</section>

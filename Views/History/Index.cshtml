@@ -1,0 +1,77 @@
+@model HistoryIndexViewModel
+@{
+    ViewData["Title"] = "Move History";
+}
+
+<section class="hero-banner hero-banner-compact" data-reveal>
+    <div>
+        <p class="eyebrow">Audit trail</p>
+        <h2>Every stock move, one timeline</h2>
+        <p class="muted">Trace receipts, outbound picks, adjustments, and manual corrections without jumping between screens.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button button-primary" asp-controller="Operations" asp-action="Index" asp-route-type="Receipt">Open operations</a>
+        <a class="button button-ghost" asp-controller="Stock" asp-action="Index">Open stock</a>
+    </div>
+</section>
+
+<section class="panel stack-lg" data-reveal>
+    <div class="toolbar">
+        <div>
+            <p class="eyebrow">Stock journal</p>
+            <h2>Move history</h2>
+        </div>
+
+        <form method="get" asp-action="Index" class="inline-form">
+            <input type="search" name="q" value="@Model.Search" placeholder="Search reference, product or SKU" />
+            <button type="submit" class="button button-ghost">Search</button>
+        </form>
+    </div>
+
+    <div class="table-wrap">
+        @if (Model.Moves.Count == 0)
+        {
+            <div class="empty-state">
+                <strong>No stock movements match this search.</strong>
+                <p class="muted">Validated operations and manual adjustments will appear here automatically.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Reference</th>
+                    <th>Product</th>
+                    <th>Move</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Qty</th>
+                    <th>User</th>
+                    <th>Note</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var move in Model.Moves)
+                {
+                    <tr>
+                        <td>@move.EventAt</td>
+                        <td>@move.Reference</td>
+                        <td>
+                            <strong>@move.ProductName</strong>
+                            <small>@move.Sku</small>
+                        </td>
+                        <td><span class="badge @(move.MoveKind == "IN" ? "ready" : move.MoveKind == "OUT" ? "cancelled" : "waiting")">@move.MoveKind</span></td>
+                        <td>@move.FromLocationLabel</td>
+                        <td>@move.ToLocationLabel</td>
+                        <td>@move.Quantity</td>
+                        <td>@move.PerformedBy</td>
+                        <td>@move.Note</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>

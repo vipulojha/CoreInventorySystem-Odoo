@@ -1,0 +1,169 @@
+@model SettingsIndexViewModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<section class="hero-banner hero-banner-compact" data-reveal>
+    <div>
+        <p class="eyebrow">Foundation data</p>
+        <h2>Warehouse and location masters</h2>
+        <p class="muted">Keep the physical layout clean here so every receipt, pick, and adjustment uses the right structure.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button button-primary" asp-controller="Stock" asp-action="Index">Open stock</a>
+        <a class="button button-ghost" asp-controller="Operations" asp-action="Index" asp-route-type="Receipt">Open operations</a>
+    </div>
+</section>
+
+<section class="panel-grid two">
+    <article class="panel" data-reveal>
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Warehouse master</p>
+                <h2>@(Model.WarehouseForm.Id.HasValue ? "Edit warehouse" : "New warehouse")</h2>
+            </div>
+        </div>
+
+        <form asp-action="SaveWarehouse" method="post" class="stack">
+            @Html.AntiForgeryToken()
+            <input asp-for="WarehouseForm.Id" type="hidden" />
+
+            <div class="field-grid two">
+                <label class="field">
+                    <span>Short Code</span>
+                    <input asp-for="WarehouseForm.Code" />
+                    <span asp-validation-for="WarehouseForm.Code" class="field-error"></span>
+                </label>
+                <label class="field">
+                    <span>Name</span>
+                    <input asp-for="WarehouseForm.Name" />
+                    <span asp-validation-for="WarehouseForm.Name" class="field-error"></span>
+                </label>
+            </div>
+
+            <label class="field">
+                <span>Address</span>
+                <textarea asp-for="WarehouseForm.Address" rows="3"></textarea>
+                <span asp-validation-for="WarehouseForm.Address" class="field-error"></span>
+            </label>
+
+            <button type="submit" class="button button-primary">Save Warehouse</button>
+        </form>
+
+        <div class="table-wrap space-top">
+            @if (Model.Warehouses.Count == 0)
+            {
+                <div class="empty-state">
+                    <strong>No warehouses configured.</strong>
+                    <p class="muted">Create a warehouse first, then add locations under it.</p>
+                </div>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var warehouse in Model.Warehouses)
+                    {
+                        <tr>
+                            <td>@warehouse.Code</td>
+                            <td>@warehouse.Name</td>
+                            <td>@warehouse.Address</td>
+                            <td><a class="button button-ghost" asp-action="Index" asp-route-warehouseId="@warehouse.Id">Edit</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </article>
+
+    <article class="panel" data-reveal>
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Location master</p>
+                <h2>@(Model.LocationForm.Id.HasValue ? "Edit location" : "New location")</h2>
+            </div>
+        </div>
+
+        <form asp-action="SaveLocation" method="post" class="stack">
+            @Html.AntiForgeryToken()
+            <input asp-for="LocationForm.Id" type="hidden" />
+
+            <label class="field">
+                <span>Warehouse</span>
+                <select asp-for="LocationForm.WarehouseId" data-location-source>
+                    @foreach (var option in Model.WarehouseOptions)
+                    {
+                        <option value="@option.Value" data-code="@option.Group">@option.Label</option>
+                    }
+                </select>
+                <span asp-validation-for="LocationForm.WarehouseId" class="field-error"></span>
+            </label>
+
+            <div class="field-grid two">
+                <label class="field">
+                    <span>Short Code</span>
+                    <input asp-for="LocationForm.Code" />
+                    <span asp-validation-for="LocationForm.Code" class="field-error"></span>
+                </label>
+                <label class="field">
+                    <span>Name</span>
+                    <input asp-for="LocationForm.Name" />
+                    <span asp-validation-for="LocationForm.Name" class="field-error"></span>
+                </label>
+            </div>
+
+            <label class="field">
+                <span>Kind</span>
+                <input asp-for="LocationForm.Kind" />
+                <span asp-validation-for="LocationForm.Kind" class="field-error"></span>
+            </label>
+
+            <button type="submit" class="button button-primary">Save Location</button>
+        </form>
+
+        <div class="table-wrap space-top">
+            @if (Model.Locations.Count == 0)
+            {
+                <div class="empty-state">
+                    <strong>No locations configured yet.</strong>
+                    <p class="muted">Add stock, inbound, or outbound locations after the warehouse list is ready.</p>
+                </div>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Warehouse</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Kind</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var location in Model.Locations)
+                    {
+                        <tr>
+                            <td>@location.WarehouseCode</td>
+                            <td>@location.Code</td>
+                            <td>@location.Name</td>
+                            <td>@location.Kind</td>
+                            <td><a class="button button-ghost" asp-action="Index" asp-route-locationId="@location.Id">Edit</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </article>
+</section>

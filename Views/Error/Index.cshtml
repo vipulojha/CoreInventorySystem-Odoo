@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Something Went Wrong";
+}
+
+<section class="error-shell">
+    <article class="panel error-panel" data-reveal>
+        <p class="eyebrow">CoreInventory</p>
+        <div class="error-code">@ViewData["StatusCode"]</div>
+        <h1>Request could not be completed</h1>
+        <p class="muted">@ViewData["Message"]</p>
+        <div class="toolbar-actions">
+            <a class="button button-primary" asp-controller="Dashboard" asp-action="Index">Go To Dashboard</a>
+            <a class="button button-ghost" asp-controller="Account" asp-action="Login">Go To Login</a>
+        </div>
+    </article>
+</section>

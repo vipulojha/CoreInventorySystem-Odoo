@@ -1,0 +1,222 @@
+@model OperationEditorViewModel
+@{
+    ViewData["Title"] = $"{Model.Type} Order";
+}
+
+<section class="stack-lg">
+    <div class="panel" data-reveal>
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">@Model.Type workflow</p>
+                <h2>@Model.Reference</h2>
+                <p class="muted">@Model.StatusHint</p>
+            </div>
+
+            <div class="toolbar-actions">
+                @foreach (var action in Model.Actions)
+                {
+                    <form asp-action="Transition" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="action" value="@action.Action" />
+                        <button type="submit" class="button @(action.Tone == "success" ? "button-success" : action.Tone == "ghost" ? "button-ghost" : "button-primary")">
+                            @action.Label
+                        </button>
+                    </form>
+                }
+
+                @if (Model.Id.HasValue && Model.Status == OperationStatuses.Done)
+                {
+                    <a class="button button-ghost" asp-action="Print" asp-route-id="@Model.Id">Print</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Save" method="post" class="stack-lg" id="operation-form">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="Type" type="hidden" />
+        <input asp-for="Status" type="hidden" />
+        <input asp-for="Reference" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <section class="panel" data-reveal>
+            <div class="field-grid three">
+                <label class="field">
+                    <span>Reference</span>
+                    <input value="@Model.Reference" readonly />
+                </label>
+                <label class="field">
+                    <span>Status</span>
+                    <input value="@Model.Status" readonly />
+                </label>
+                <label class="field">
+                    <span>Warehouse</span>
+                    <select asp-for="WarehouseId" data-location-source>
+                        @foreach (var option in Model.WarehouseOptions)
+                        {
+                            <option value="@option.Value" data-code="@option.Group">@option.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="WarehouseId" class="field-error"></span>
+                </label>
+            </div>
+
+            <div class="field-grid @(Model.ShowDeliveryAddress ? "three" : "two")">
+                <label class="field">
+                    <span>@Model.ContactLabel</span>
+                    <input asp-for="ContactName" />
+                    <span asp-validation-for="ContactName" class="field-error"></span>
+                </label>
+                <label class="field">
+                    <span>Schedule Date</span>
+                    <input asp-for="ScheduleDate" type="date" />
+                    <span asp-validation-for="ScheduleDate" class="field-error"></span>
+                </label>
+                @if (Model.ShowDeliveryAddress)
+                {
+                    <label class="field">
+                        <span>Delivery Address</span>
+                        <input asp-for="DeliveryAddress" />
+                        <span asp-validation-for="DeliveryAddress" class="field-error"></span>
+                    </label>
+                }
+            </div>
+
+            <div class="field-grid @(Model.ShowFromLocation && Model.ShowToLocation ? "three" : "two")">
+                @if (Model.ShowFromLocation)
+                {
+                    <label class="field">
+                        <span>@Model.FromLocationLabel</span>
+                        <select asp-for="FromLocationId" data-location-target>
+                            <option value="">Select location</option>
+                            @foreach (var option in Model.LocationOptions)
+                            {
+                                <option value="@option.Value" data-group="@option.Group">@option.Label</option>
+                            }
+                        </select>
+                        <span asp-validation-for="FromLocationId" class="field-error"></span>
+                    </label>
+                }
+
+                @if (Model.ShowToLocation)
+                {
+                    <label class="field">
+                        <span>@Model.ToLocationLabel</span>
+                        <select asp-for="ToLocationId" data-location-target>
+                            <option value="">Select location</option>
+                            @foreach (var option in Model.LocationOptions)
+                            {
+                                <option value="@option.Value" data-group="@option.Group">@option.Label</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ToLocationId" class="field-error"></span>
+                    </label>
+                }
+
+                <label class="field">
+                    <span>Responsible</span>
+                    <select asp-for="ResponsibleUserId">
+                        <option value="">Select user</option>
+                        @foreach (var option in Model.UserOptions)
+                        {
+                            <option value="@option.Value">@option.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ResponsibleUserId" class="field-error"></span>
+                </label>
+            </div>
+
+            <label class="field">
+                <span>Notes</span>
+                <textarea asp-for="Notes" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="field-error"></span>
+            </label>
+        </section>
+
+        <section class="panel" data-reveal>
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Line items</p>
+                    <h2>Products</h2>
+                </div>
+                <button type="button" class="button button-ghost" data-add-line>Add product</button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table" id="line-items-table" data-line-count="@Model.Lines.Count">
+                    <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Cost</th>
+                        <th>Available</th>
+                        <th>Note</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for (var i = 0; i < Model.Lines.Count; i++)
+                    {
+                        <tr class="@(Model.Lines[i].InsufficientStock ? "line-short" : string.Empty)">
+                            <td>
+                                <select name="Lines[@i].ProductId">
+                                    <option value="">Select product</option>
+                                    @foreach (var option in Model.ProductOptions)
+                                    {
+                                        <option value="@option.Value" selected="@(option.Value == Model.Lines[i].ProductId ? "selected" : null)">@option.Label</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <input name="Lines[@i].Quantity" type="number" min="1" value="@Model.Lines[i].Quantity" />
+                            </td>
+                            <td>
+                                <input name="Lines[@i].UnitCost" type="number" min="0" step="0.01" value="@Model.Lines[i].UnitCost" />
+                            </td>
+                            <td>
+                                <span class="stock-pill @(Model.Lines[i].InsufficientStock ? "danger" : string.Empty)">
+                                    @(Model.Lines[i].AvailableStock > 0 ? Model.Lines[i].AvailableStock : 0)
+                                </span>
+                            </td>
+                            <td>
+                                <input name="Lines[@i].Note" value="@Model.Lines[i].Note" />
+                            </td>
+                            <td>
+                                <button type="button" class="button button-ghost icon-only" data-remove-line>Remove</button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="hint">Need a new SKU first? Add it from the <a asp-controller="Stock" asp-action="Index">stock page</a>.</p>
+        </section>
+
+        <div class="toolbar-actions end">
+            <a class="button button-ghost" asp-action="Index" asp-route-type="@Model.Type">Back</a>
+            <button type="submit" class="button button-primary">Save Order</button>
+        </div>
+    </form>
+</section>
+
+<template id="line-row-template">
+    <tr>
+        <td>
+            <select name="Lines[__index__].ProductId">
+                <option value="">Select product</option>
+                @foreach (var option in Model.ProductOptions)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+        </td>
+        <td><input name="Lines[__index__].Quantity" type="number" min="1" value="1" /></td>
+        <td><input name="Lines[__index__].UnitCost" type="number" min="0" step="0.01" value="0" /></td>
+        <td><span class="stock-pill">-</span></td>
+        <td><input name="Lines[__index__].Note" value="" /></td>
+        <td><button type="button" class="button button-ghost icon-only" data-remove-line>Remove</button></td>
+    </tr>
+</template>

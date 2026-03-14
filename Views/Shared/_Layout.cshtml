@@ -1,0 +1,88 @@
+@using CoreInventory.Extensions
+@{
+    var path = Context.Request.Path.Value?.ToLowerInvariant() ?? "/";
+    var isAuthScreen = path.StartsWith("/account");
+    var pageTitle = ViewData["Title"]?.ToString() ?? "CoreInventory";
+    var displayName = User.GetDisplayName();
+    var initial = string.IsNullOrWhiteSpace(displayName) ? "O" : displayName.Substring(0, 1).ToUpperInvariant();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@pageTitle - CoreInventory</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(isAuthScreen ? "auth-body" : "app-body")">
+@if (isAuthScreen)
+{
+    <main class="auth-shell">
+        @RenderBody()
+    </main>
+}
+else
+{
+    <div class="app-shell">
+        <aside class="sidebar" data-reveal>
+            <a class="brand" asp-controller="Dashboard" asp-action="Index">
+                <span class="brand-mark">CI</span>
+                <span>
+                    <strong>CoreInventory</strong>
+                    <small>Warehouse Control</small>
+                </span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <a class="@(path == "/" || path.StartsWith("/dashboard") ? "active" : "")" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a class="@(path.StartsWith("/operations") ? "active" : "")" asp-controller="Operations" asp-action="Index" asp-route-type="Receipt">Operations</a>
+                <a class="@(path.StartsWith("/stock") ? "active" : "")" asp-controller="Stock" asp-action="Index">Stock</a>
+                <a class="@(path.StartsWith("/history") ? "active" : "")" asp-controller="History" asp-action="Index">Move History</a>
+                <a class="@(path.StartsWith("/settings") ? "active" : "")" asp-controller="Settings" asp-action="Index">Settings</a>
+            </nav>
+
+            <div class="sidebar-foot">
+                <div class="user-chip">
+                    <span class="avatar">@initial</span>
+                    <div>
+                        <strong>@displayName</strong>
+                        <small>Logged in</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-shell">
+            <header class="topbar" data-reveal>
+                <div>
+                    <p class="eyebrow">Inventory operations</p>
+                    <h1>@pageTitle</h1>
+                </div>
+
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="button button-ghost" type="submit">Logout</button>
+                </form>
+            </header>
+
+            @if (TempData["Success"] is string success)
+            {
+                <div class="flash success">@success</div>
+            }
+
+            @if (TempData["Error"] is string error)
+            {
+                <div class="flash danger">@error</div>
+            }
+
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+}
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

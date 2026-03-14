@@ -1,0 +1,48 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<section class="auth-panel brand-panel" data-reveal>
+    <p class="eyebrow">Inventory control</p>
+    <h1>CoreInventory</h1>
+    <p class="muted">A lightweight warehouse app for receipts, deliveries, stock, and movement history.</p>
+
+    <ul class="auth-points">
+        <li>Receipt, delivery, and adjustment workflows</li>
+        <li>Product stock visibility by warehouse and location</li>
+        <li>PostgreSQL-backed operations with no external APIs</li>
+    </ul>
+</section>
+
+<section class="auth-panel form-panel" data-reveal>
+    <div class="section-head compact">
+        <div>
+            <p class="eyebrow">Welcome back</p>
+            <h2>Sign in</h2>
+        </div>
+    </div>
+
+    <form method="post" asp-action="Login" class="stack">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <label class="field">
+            <span>Login ID</span>
+            <input asp-for="LoginId" autocomplete="username" />
+            <span asp-validation-for="LoginId" class="field-error"></span>
+        </label>
+
+        <label class="field">
+            <span>Password</span>
+            <input asp-for="Password" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="field-error"></span>
+        </label>
+
+        <button type="submit" class="button button-primary">Sign In</button>
+    </form>
+
+    <div class="auth-links">
+        <a asp-action="ForgotPassword">Forgot Password?</a>
+        <a asp-action="Register">Create account</a>
+    </div>
+</section>

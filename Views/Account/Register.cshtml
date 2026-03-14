@@ -1,0 +1,61 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<section class="auth-panel brand-panel" data-reveal>
+    <p class="eyebrow">New operator</p>
+    <h1>Create your account</h1>
+    <p class="muted">The sign-up rules follow the diagram: unique login ID, unique email, and a strong password.</p>
+</section>
+
+<section class="auth-panel form-panel" data-reveal>
+    <div class="section-head compact">
+        <div>
+            <p class="eyebrow">Access setup</p>
+            <h2>Register</h2>
+        </div>
+    </div>
+
+    <form method="post" asp-action="Register" class="stack">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="field-grid two">
+            <label class="field">
+                <span>Login ID</span>
+                <input asp-for="LoginId" autocomplete="username" />
+                <span asp-validation-for="LoginId" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>Display Name</span>
+                <input asp-for="DisplayName" autocomplete="name" />
+                <span asp-validation-for="DisplayName" class="field-error"></span>
+            </label>
+        </div>
+
+        <label class="field">
+            <span>Email Address</span>
+            <input asp-for="Email" autocomplete="email" />
+            <span asp-validation-for="Email" class="field-error"></span>
+        </label>
+
+        <div class="field-grid two">
+            <label class="field">
+                <span>Password</span>
+                <input asp-for="Password" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>Re-enter Password</span>
+                <input asp-for="ConfirmPassword" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+            </label>
+        </div>
+
+        <button type="submit" class="button button-primary">Create Account</button>
+    </form>
+
+    <div class="auth-links">
+        <a asp-action="Login">Back to sign in</a>
+    </div>
+</section>

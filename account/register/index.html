@@ -7,16 +7,17 @@
   <link rel="stylesheet" href="/styles/site.css?v=4">
   <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    body { background: radial-gradient(circle at top left, hsla(var(--h), 70%, 40%, 0.12), transparent 40%), var(--bg); }
-    .auth-layout { align-items: flex-start; min-height: 80vh; }
-    .hero-card { background: linear-gradient(145deg, hsla(var(--h), 70%, 25%, 0.95), #1a3c40); animation: fadeSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .hero-card h1 { font-family: var(--font-display); font-size: 3rem; line-height: 1.1; margin: 1rem 0; }
-    .panel { animation: fadeSlideUp 1s ease-out; padding: 2rem; }
-    .field input { background: rgba(255,255,255,0.6); backdrop-filter: blur(4px); }
-    .brand-float { position: absolute; top: 2rem; left: 2rem; animation: fadeSlideUp 0.6s ease-out; }
-    .mini-list { list-style: none; padding: 0; margin-top: 1.5rem; opacity: 0.8; font-size: 0.9rem; }
-    .mini-list li { margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.6rem; }
-    .mini-list li::before { content: "✓"; color: #fff; background: rgba(255,255,255,0.15); width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; font-size: 0.7rem; font-weight: 900; }
+    body { background: radial-gradient(circle at top left, hsla(var(--h), 70%, 40%, 0.15), transparent 40%), var(--bg); overflow-x: hidden; }
+    .auth-layout { align-items: center; min-height: 85vh; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    .hero-card { background: linear-gradient(145deg, hsla(var(--h), 70%, 25%, 0.8), #112d31); padding: 4rem 3rem; border-radius: 32px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 50px 100px rgba(0,0,0,0.3); backdrop-filter: blur(20px); animation: fadeSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .hero-card h1 { font-family: var(--font-display); font-size: 3.5rem; line-height: 1.1; margin: 1.5rem 0; letter-spacing: -0.02em; }
+    .panel { border-radius: 32px; animation: fadeSlideUp 1s ease-out; padding: 3rem; background: var(--panel); border: 1px solid var(--line); }
+    .field input { background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); height: 50px; }
+    .brand-float { position: absolute; top: 3rem; left: 3rem; animation: fadeSlideUp 0.6s ease-out; }
+    .mini-list { list-style: none; padding: 0; margin-top: 2rem; opacity: 0.9; font-size: 0.95rem; line-height: 1.8; }
+    .mini-list li { margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.85rem; }
+    .mini-list li::before { content: "✓"; color: #fff; background: var(--teal); width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; font-size: 0.75rem; font-weight: 900; box-shadow: 0 4px 10px rgba(20,111,116,0.3); }
+    @media(max-width: 900px) { .auth-layout { grid-template-columns: 1fr; margin-top: 6rem; gap: 2rem; } .hero-card { display:none; } }
   </style>
 </head>
 <body>

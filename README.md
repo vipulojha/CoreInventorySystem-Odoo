@@ -1,4 +1,4 @@
-# 🌌 CoreInventory: Ultra-Premium Workspace
+# 🌌 CoreInventory: Worksspace
 
 CoreInventory is a high-fidelity, enterprise-grade warehouse management system. It is designed with a "Judge-Ready" aesthetic, featuring the **Midnight & Aurora** design system, advanced glassmorphism, and fluid motion backgrounds.
 
@@ -32,7 +32,8 @@ You may notice that the **PostgreSQL Database** itself is not "stored" in this r
 ## 🚀 Deployment
 
 This project is optimized for deployment on **Vercel**. Every navigation route and API endpoint is precisely mapped in `vercel.json` to ensure a frictionless user experience across all web browsers.
+deployment link-https://vercel.com/vipulojha1860-9512s-projects/coreinventorysystem-odoo
 
 ---
-*Precision. Aesthetics. Performance.*
+
 

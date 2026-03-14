@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stock Accuracy - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css?v=3">
-  <script src="/scripts/auth.js?v=3" defer></script>
+  <title>Live Stock - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .data-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-soft); }
-    .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--line); }
-    .data-table th { background: rgba(20, 111, 116, 0.05); color: var(--teal-deep); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
-    .data-table tr:last-child td { border-bottom: none; }
+    .page-title { margin-bottom: 2rem; }
+    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
+    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
+    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .low { color: var(--danger); font-weight:800; }
+    .adj-form { margin-top: 2rem; }
   </style>
 </head>
 <body>
@@ -21,17 +23,21 @@
         <span class="brand-mark">CI</span>
         <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
       </div>
-      <div style="display: flex; gap: 1rem;">
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
         <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button class="button button-ghost" type="button" data-nav="/operations/">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/" style="background:rgba(20,111,116,0.12);">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
         <button id="logout-button" class="button button-ghost" type="button">Logout</button>
-      </div>
+      </nav>
     </header>
 
     <div class="page-title">
-      <div>
-        <h1 style="margin: 0;">Live Stock Accuracy</h1>
-        <p class="muted" style="margin: 0.5rem 0 0;">View real-time physical counts across warehouse locations.</p>
-      </div>
+      <p class="eyebrow">Inventory</p>
+      <h1 style="margin:0.25rem 0 0.5rem;">Live Stock Accuracy</h1>
+      <p class="muted">Real-time on-hand quantities across all locations. Items in <span style="color:var(--danger);font-weight:700;">red</span> are at or below safety stock.</p>
     </div>
 
     <table class="data-table">
@@ -41,34 +47,47 @@
           <th>Product</th>
           <th>On Hand</th>
           <th>Allocated</th>
+          <th>Free to Use</th>
         </tr>
       </thead>
       <tbody id="stock-table-body">
-        <tr><td colspan="4" style="text-align: center; color: var(--muted);">Loading...</td></tr>
+        <tr><td colspan="5" style="text-align:center; color:var(--muted);">Loading...</td></tr>
       </tbody>
     </table>
   </main>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const user = requireAuth();
+      if (!user) return;
+      applyRbac(user);
+      const logoutBtn = document.getElementById("logout-button");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("coreinventory.token");
+        localStorage.removeItem("coreinventory.user");
+        window.location.href = "/account/login/";
+      });
+
       fetch("/api/inventory/stock")
-        .then(res => res.json())
+        .then(r => r.json())
         .then(data => {
           const tbody = document.getElementById("stock-table-body");
           if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--muted);">No stock found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No stock found</td></tr>';
             return;
           }
-          tbody.innerHTML = data.map(b => `
-            <tr>
+          tbody.innerHTML = data.map(b => {
+            const isLow = b.on_hand <= 10;
+            const freeToUse = b.on_hand - b.allocated;
+            return `<tr>
               <td>${b.warehouse_name} / <strong>${b.location_code}</strong></td>
               <td>[${b.product_sku}] ${b.product_name}</td>
-              <td><strong style="color: ${b.on_hand <= 10 ? 'var(--danger)' : 'var(--text)'}">${b.on_hand}</strong></td>
+              <td class="${isLow ? "low" : ""}">${b.on_hand}</td>
               <td>${b.allocated}</td>
-            </tr>
-          `).join('');
-        })
-        .catch(console.error);
+              <td>${freeToUse}</td>
+            </tr>`;
+          }).join("");
+        }).catch(console.error);
     });
   </script>
 </body>

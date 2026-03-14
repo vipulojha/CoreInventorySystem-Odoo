@@ -27,7 +27,7 @@ module.exports = asyncHandler(async (req, res) => {
   const user = await withClient(async (client) => {
     const result = await client.query(
       `
-      select id, login_id, display_name, email, password_hash, is_active, email_verified_at
+      select id, login_id, display_name, email, password_hash, is_active, email_verified_at, role
       from app_user
       where lower(login_id) = lower($1)
       limit 1;
@@ -57,7 +57,8 @@ module.exports = asyncHandler(async (req, res) => {
       sub: String(user.id),
       loginId: user.login_id,
       name: user.display_name,
-      email: user.email
+      email: user.email,
+      role: user.role || "user"
     },
     process.env.AUTH_JWT_SECRET,
     { expiresIn: "7d" }
@@ -72,7 +73,8 @@ module.exports = asyncHandler(async (req, res) => {
       id: user.id,
       loginId: user.login_id,
       name: user.display_name,
-      email: user.email
+      email: user.email,
+      role: user.role || "user"
     }
   });
 });

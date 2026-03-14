@@ -4,19 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operations - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css?v=3">
-  <script src="/scripts/auth.js?v=3" defer></script>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
   <style>
-    .page-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .data-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-soft); }
-    .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--line); }
-    .data-table th { background: rgba(20, 111, 116, 0.05); color: var(--teal-deep); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
-    .data-table tr:last-child td { border-bottom: none; }
-    .badge { padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
-    .status-draft { background: rgba(116, 102, 81, 0.15); color: var(--muted); }
-    .status-ready { background: rgba(20, 111, 116, 0.15); color: var(--teal-deep); }
-    .status-done { background: rgba(47, 109, 68, 0.15); color: var(--success); }
-    .status-waiting { background: rgba(201, 130, 28, 0.15); color: var(--amber); }
+    .page-title { margin-bottom: 2rem; }
+    .data-table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-soft); }
+    .data-table th, .data-table td { padding:0.85rem 1rem; text-align:left; border-bottom:1px solid var(--line); }
+    .data-table th { background:rgba(20,111,116,0.05); color:var(--teal-deep); font-weight:800; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tbody tr:hover { background:rgba(20,111,116,0.04); cursor:pointer; }
+    .badge { padding:0.2rem 0.5rem; border-radius:999px; font-size:0.73rem; font-weight:800; text-transform:uppercase; }
+    .status-draft { background:rgba(116,102,81,0.15); color:var(--muted); }
+    .status-ready { background:rgba(20,111,116,0.15); color:var(--teal-deep); }
+    .status-done { background:rgba(47,109,68,0.15); color:var(--success); }
+    .status-waiting { background:rgba(201,130,28,0.15); color:var(--amber); }
+    .status-cancelled { background:rgba(170,86,53,0.15); color:var(--danger); }
+    .filter-row { display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+    .filter-row select, .filter-row input { padding:0.55rem 0.9rem; border-radius:12px; border:1px solid rgba(130,117,95,0.26); background:rgba(255,255,255,0.92); font:inherit; }
   </style>
 </head>
 <body>
@@ -26,17 +30,38 @@
         <span class="brand-mark">CI</span>
         <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
       </div>
-      <div style="display: flex; gap: 1rem;">
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
         <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button class="button button-ghost" type="button" data-nav="/operations/" style="background:rgba(20,111,116,0.12);">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
         <button id="logout-button" class="button button-ghost" type="button">Logout</button>
-      </div>
+      </nav>
     </header>
 
     <div class="page-title">
-      <div>
-        <h1 style="margin: 0;">Operations</h1>
-        <p class="muted" style="margin: 0.5rem 0 0;">Track receipts, deliveries, and transfers.</p>
-      </div>
+      <p class="eyebrow">Warehouse</p>
+      <h1 style="margin:0.25rem 0 0.5rem;">Operations</h1>
+      <p class="muted">View and manage receipts, deliveries, and internal transfers.</p>
+    </div>
+
+    <div class="filter-row">
+      <select id="type-filter">
+        <option value="">All Types</option>
+        <option value="Receipt">Receipts</option>
+        <option value="Delivery">Deliveries</option>
+        <option value="Adjustment">Adjustments</option>
+      </select>
+      <select id="status-filter">
+        <option value="">All Statuses</option>
+        <option value="Draft">Draft</option>
+        <option value="Waiting">Waiting</option>
+        <option value="Ready">Ready</option>
+        <option value="Done">Done</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
     </div>
 
     <table class="data-table">
@@ -50,31 +75,55 @@
         </tr>
       </thead>
       <tbody id="operations-table-body">
-        <tr><td colspan="5" style="text-align: center; color: var(--muted);">Loading...</td></tr>
+        <tr><td colspan="5" style="text-align:center; color:var(--muted);">Loading...</td></tr>
       </tbody>
     </table>
   </main>
 
   <script>
+    let allOps = [];
+
+    function renderOps(data) {
+      const tbody = document.getElementById("operations-table-body");
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No operations found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(o => `<tr>
+        <td><strong>${o.reference}</strong></td>
+        <td>${o.operation_type}</td>
+        <td>${o.contact_name || "—"}</td>
+        <td>${new Date(o.schedule_date).toLocaleDateString()}</td>
+        <td><span class="badge status-${o.status.toLowerCase()}">${o.status}</span></td>
+      </tr>`).join("");
+    }
+
+    function applyFilters() {
+      const type = document.getElementById("type-filter").value;
+      const status = document.getElementById("status-filter").value;
+      let filtered = allOps;
+      if (type) filtered = filtered.filter(o => o.operation_type === type);
+      if (status) filtered = filtered.filter(o => o.status === status);
+      renderOps(filtered);
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
+      const user = requireAuth();
+      if (!user) return;
+      applyRbac(user);
+      const logoutBtn = document.getElementById("logout-button");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("coreinventory.token");
+        localStorage.removeItem("coreinventory.user");
+        window.location.href = "/account/login/";
+      });
+
+      document.getElementById("type-filter").addEventListener("change", applyFilters);
+      document.getElementById("status-filter").addEventListener("change", applyFilters);
+
       fetch("/api/inventory/operations")
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.getElementById("operations-table-body");
-          if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--muted);">No operations found</td></tr>';
-            return;
-          }
-          tbody.innerHTML = data.map(o => `
-            <tr>
-              <td><strong>${o.reference}</strong></td>
-              <td>${o.operation_type}</td>
-              <td>${o.contact_name || '-'}</td>
-              <td>${new Date(o.schedule_date).toLocaleDateString()}</td>
-              <td><span class="badge status-${o.status.toLowerCase()}">${o.status}</span></td>
-            </tr>
-          `).join('');
-        })
+        .then(r => r.json())
+        .then(data => { allOps = data || []; renderOps(allOps); })
         .catch(console.error);
     });
   </script>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Move History - CoreInventory</title>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
+  <style>
+    .page-title { margin-bottom: 2rem; }
+    .data-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-soft); }
+    .data-table th, .data-table td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+    .data-table th { background: rgba(20, 111, 116, 0.05); color: var(--teal-deep); font-weight: 800; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.05em; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .move-in td { border-left: 3px solid var(--success); }
+    .move-out td { border-left: 3px solid var(--danger); }
+    .move-adjust td { border-left: 3px solid var(--amber); }
+    .badge { padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.73rem; font-weight: 800; text-transform: uppercase; }
+    .badge-in { background: rgba(47,109,68,0.15); color: var(--success); }
+    .badge-out { background: rgba(170,86,53,0.15); color: var(--danger); }
+    .badge-adjust { background: rgba(201,130,28,0.15); color: var(--amber); }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CI</span>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
+      </div>
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="button button-ghost" type="button" data-nav="/dashboard/">Dashboard</button>
+        <button class="button button-ghost" type="button" data-nav="/operations/">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/history/" style="background: rgba(20,111,116,0.12);">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </nav>
+    </header>
+
+    <div class="page-title">
+      <p class="eyebrow">Audit Trail</p>
+      <h1 style="margin:0.25rem 0 0.5rem;">Move History</h1>
+      <p class="muted">All stock movements — IN (green), OUT (red), Adjustments (amber).</p>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Reference</th>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Date</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody id="history-table-body">
+        <tr><td colspan="8" style="text-align:center; color:var(--muted);">Loading...</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = requireAuth();
+      if (!user) return;
+      applyRbac(user);
+
+      const logoutBtn = document.getElementById("logout-button");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("coreinventory.token");
+        localStorage.removeItem("coreinventory.user");
+        window.location.href = "/account/login/";
+      });
+
+      fetch("/api/inventory/history")
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.getElementById("history-table-body");
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);">No movements found</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(m => {
+            const cls = m.move_kind === "IN" ? "move-in" : m.move_kind === "OUT" ? "move-out" : "move-adjust";
+            const badgeCls = m.move_kind === "IN" ? "badge-in" : m.move_kind === "OUT" ? "badge-out" : "badge-adjust";
+            const date = new Date(m.event_at).toLocaleDateString();
+            return `<tr class="${cls}">
+              <td><span class="badge ${badgeCls}">${m.move_kind}</span></td>
+              <td><strong>${m.reference}</strong></td>
+              <td>[${m.product_sku}] ${m.product_name}</td>
+              <td>${m.quantity}</td>
+              <td>${m.from_loc || "—"}</td>
+              <td>${m.to_loc || "—"}</td>
+              <td>${date}</td>
+              <td>${m.note || "—"}</td>
+            </tr>`;
+          }).join("");
+        })
+        .catch(console.error);
+    });
+  </script>
+</body>
+</html>

@@ -7,20 +7,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Dashboard - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css?v=3">
-  <script src="/scripts/auth.js?v=3" defer></script>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark">CI</span>
-        <div>
-          <strong>CoreInventory</strong>
-          <div class="muted">Enterprise Workspace</div>
-        </div>
+        <div><strong>CoreInventory</strong><div class="muted">Enterprise Workspace</div></div>
       </div>
-      <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      <nav style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="button button-ghost" type="button" data-nav="/operations/">Operations</button>
+        <button class="button button-ghost" type="button" data-nav="/products/">Products</button>
+        <button class="button button-ghost" type="button" data-nav="/stock/">Stock</button>
+        <button class="button button-ghost" type="button" data-nav="/history/">Move History</button>
+        <button class="button button-ghost" type="button" data-nav="/settings/" data-admin-only>Settings</button>
+        <button id="logout-button" class="button button-ghost" type="button">Logout</button>
+      </nav>
     </header>
 
     <section class="hero">
@@ -32,41 +36,40 @@
     </section>
 
     <section class="dashboard-grid">
-      <article class="card" onclick="window.location.href='/products/'" style="cursor: pointer; transition: transform 0.2s; border: 1px solid var(--teal);">
+      <article class="card" onclick="window.location.href='/products/'" style="cursor:pointer; border:1px solid var(--teal);">
         <p class="eyebrow">Products</p>
         <h3>Manage Catalog</h3>
         <p>Keep track of SKUs, categories, and unit measurements across all your registered locations.</p>
       </article>
-      <article class="card" onclick="window.location.href='/operations/'" style="cursor: pointer; transition: transform 0.2s; border: 1px solid var(--amber);">
+      <article class="card" onclick="window.location.href='/operations/'" style="cursor:pointer; border:1px solid var(--amber);">
         <p class="eyebrow">Operations</p>
         <h3>Track Movements</h3>
         <p>Receive goods from vendors, deliver to customers, and execute internal warehouse transfers.</p>
       </article>
-      <article class="card" onclick="window.location.href='/stock/'" style="cursor: pointer; transition: transform 0.2s; border: 1px solid var(--success);">
+      <article class="card" onclick="window.location.href='/stock/'" style="cursor:pointer; border:1px solid var(--success);">
         <p class="eyebrow">Inventory</p>
         <h3>Live Stock Accuracy</h3>
         <p>Perform physical counts, handle adjustments, and monitor low stock alerts in real-time.</p>
       </article>
     </section>
 
-    <!-- KPI Section that we will populate via API -->
-    <section class="dashboard-stats" style="margin-top: 2rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-       <div class="card" style="text-align: center; padding: 1.5rem;">
-          <h2 id="stat-products" style="margin: 0; font-size: 2.5rem; color: var(--teal);">0</h2>
-          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Total Products</p>
-       </div>
-       <div class="card" style="text-align: center; padding: 1.5rem;">
-          <h2 id="stat-low-stock" style="margin: 0; font-size: 2.5rem; color: var(--danger);">0</h2>
-          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Low Stock Items</p>
-       </div>
-       <div class="card" style="text-align: center; padding: 1.5rem;">
-          <h2 id="stat-receipts" style="margin: 0; font-size: 2.5rem; color: var(--amber);">0</h2>
-          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Pending Receipts</p>
-       </div>
-       <div class="card" style="text-align: center; padding: 1.5rem;">
-          <h2 id="stat-deliveries" style="margin: 0; font-size: 2.5rem; color: var(--success);">0</h2>
-          <p class="muted" style="margin: 0; font-weight: 600; font-size: 0.9rem;">Pending Deliveries</p>
-       </div>
+    <section style="margin-top: 2rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;">
+      <div class="card" style="text-align:center; padding:1.5rem;">
+        <h2 id="stat-products" style="margin:0; font-size:2.5rem; color:var(--teal);">0</h2>
+        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Total Products</p>
+      </div>
+      <div class="card" style="text-align:center; padding:1.5rem;">
+        <h2 id="stat-low-stock" style="margin:0; font-size:2.5rem; color:var(--danger);">0</h2>
+        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Low Stock Items</p>
+      </div>
+      <div class="card" style="text-align:center; padding:1.5rem;">
+        <h2 id="stat-receipts" style="margin:0; font-size:2.5rem; color:var(--amber);">0</h2>
+        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Pending Receipts</p>
+      </div>
+      <div class="card" style="text-align:center; padding:1.5rem;">
+        <h2 id="stat-deliveries" style="margin:0; font-size:2.5rem; color:var(--success);">0</h2>
+        <p class="muted" style="margin:0; font-weight:600; font-size:0.9rem;">Pending Deliveries</p>
+      </div>
     </section>
   </main>
 </body>

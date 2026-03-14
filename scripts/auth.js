@@ -150,34 +150,42 @@ function initLoginPage() {
   });
 }
 
-function initDashboardPage() {
-  const nameTarget = byId("dashboard-name");
-  if (!nameTarget) {
-    return;
-  }
-  
-  const user = localStorage.getItem("coreinventory.user");
+// Shared helper: get the current user from localStorage or redirect to login
+function requireAuth() {
+  const userStr = localStorage.getItem("coreinventory.user");
   const token = localStorage.getItem("coreinventory.token");
-  const emailTarget = byId("dashboard-email");
-  const tokenTarget = byId("dashboard-token");
-
-  if (!user || !token) {
+  if (!userStr || !token) {
     window.location.href = "/account/login/";
-    return;
+    return null;
   }
-
   try {
-    const parsed = JSON.parse(user);
-    if (nameTarget) {
-      nameTarget.textContent = parsed.name || parsed.loginId || "Operator";
-    }
-    if (emailTarget) {
-      emailTarget.textContent = parsed.email || "-";
-    }
+    return JSON.parse(userStr);
   } catch {
     window.location.href = "/account/login/";
-    return;
+    return null;
   }
+}
+
+// Apply RBAC-based UI: show/hide admin-only elements
+function applyRbac(user) {
+  const isAdmin = user && user.role === "admin";
+  document.querySelectorAll("[data-admin-only]").forEach(el => {
+    el.style.display = isAdmin ? "" : "none";
+  });
+  document.querySelectorAll("[data-user-only]").forEach(el => {
+    el.style.display = isAdmin ? "none" : "";
+  });
+}
+
+function initDashboardPage() {
+  const nameTarget = byId("dashboard-name");
+  if (!nameTarget) return;
+
+  const user = requireAuth();
+  if (!user) return;
+
+  nameTarget.textContent = user.name || user.loginId || "Operator";
+  applyRbac(user);
 
   // Fetch Live KPI Stats
   const productStat = byId("stat-products");
@@ -196,10 +204,6 @@ function initDashboardPage() {
         }
       })
       .catch(console.error);
-  }
-
-  if (tokenTarget) {
-    tokenTarget.textContent = token;
   }
 
   const logoutButton = byId("logout-button");

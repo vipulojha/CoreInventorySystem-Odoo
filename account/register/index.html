@@ -7,8 +7,8 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Create Account - CoreInventory</title>
-  <link rel="stylesheet" href="/styles/site.css?v=3">
-  <script src="/scripts/auth.js?v=3" defer></script>
+  <link rel="stylesheet" href="/styles/site.css?v=4">
+  <script src="/scripts/auth.js?v=4" defer></script>
 </head>
 <body>
   <main class="shell">
@@ -18,6 +18,7 @@
         <h1>Create your account</h1>
         <p class="muted">Register with your login ID, display name, email, and password. For security purposes, an email verification is required before your account is activated for use with the Inventory Management System.</p>
         <ul class="mini-list">
+          <li>Login ID: 3–30 chars, letters, numbers, @, dot, _</li>
           <li>Login ID and email must be unique</li>
           <li>Password must meet the policy</li>
           <li>OTP expires automatically</li>
@@ -31,7 +32,7 @@
         <form id="register-form" class="stack">
           <label class="field">
             <span>Login ID</span>
-            <input id="loginId" maxlength="12" required>
+            <input id="loginId" maxlength="30" required placeholder="e.g. Vipul@1860">
           </label>
           <label class="field">
             <span>Display Name</span>

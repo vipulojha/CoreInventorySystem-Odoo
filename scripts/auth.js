@@ -151,9 +151,13 @@ function initLoginPage() {
 }
 
 function initDashboardPage() {
+  const nameTarget = byId("dashboard-name");
+  if (!nameTarget) {
+    return;
+  }
+  
   const user = localStorage.getItem("coreinventory.user");
   const token = localStorage.getItem("coreinventory.token");
-  const nameTarget = byId("dashboard-name");
   const emailTarget = byId("dashboard-email");
   const tokenTarget = byId("dashboard-token");
 
